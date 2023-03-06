@@ -1,6 +1,20 @@
 import arcade
 import random
+from pathlib import Path
 
+
+class Player:
+    def __init__(self):
+        self.sprite = None
+
+        self.hp = 100
+
+        self.acceleration = [0, 0]
+        self.rotation = 0
+
+    def reset(self):
+        self.acceleration = [0, 0]
+        self.rotation = 0
 
 class PrimaryView(arcade.View):
     def __init__(self):
@@ -8,17 +22,15 @@ class PrimaryView(arcade.View):
         
         self._restart = False
 
-        self.player_sprite = None
-        self.player_velocity = [0, 0]
-        self.player_delta = [0, 0]
-
+        self.player = Player()
         self.asteroids = None
+
+        self.physics_engine = None
 
         self.generate_level(*self.window.get_size())
 
     def __reset_game(self):
-        self.player_velocity = [0, 0]
-        self.player_delta = [0, 0]
+        self.player.reset()
 
     def __end_game(self):
         self.window.show_view("game_over")
@@ -26,11 +38,17 @@ class PrimaryView(arcade.View):
         self.__reset_game()
 
     def generate_level(self, width, height):
+        self.physics_engine = arcade.PymunkPhysicsEngine()
+
+        # ship sheet has two sprites side by side
+        root = Path(__file__).parent.parent.parent.parent / "assets" / "topdown-scifi" / "asteroid-fighter"
+        self.player.sprite = arcade.Sprite(root / "ship.png", image_x=0, image_y=0, image_width=48, image_height=48)
 
         # Set the player in the center
-        self.player_sprite = arcade.Sprite(":resources:images/space_shooter/playerShip1_blue.png", 0.5)
-        self.player_sprite.center_x = width // 2
-        self.player_sprite.center_y = height // 2
+        self.player.sprite.center_x = width // 2
+        self.player.sprite.center_y = height // 2
+
+        self.physics_engine.add_sprite(self.player.sprite, mass=1)
 
         # Create the asteroids
         self.asteroids = arcade.SpriteList()
@@ -48,7 +66,7 @@ class PrimaryView(arcade.View):
         ]
 
         # Randomly generate the asteroids
-        placed = [(self.player_sprite.center_x, self.player_sprite.center_y)]
+        placed = [(self.player.sprite.center_x, self.player.sprite.center_y)]
         n = 50
         for _ in range(n):
             rx, ry = 0, 0
@@ -61,6 +79,8 @@ class PrimaryView(arcade.View):
             placed.append((rx, ry))
             self.asteroids.append(asteroid)
 
+        self.physics_engine.add_sprite_list(self.asteroids, mass=1)
+
 
     def on_show(self):
         arcade.set_background_color(arcade.color.BLACK)
@@ -72,28 +92,23 @@ class PrimaryView(arcade.View):
     def on_draw(self):
         arcade.start_render()
 
-        self.player_sprite.draw()
+        self.player.sprite.draw()
         self.asteroids.draw()
 
     def on_update(self, delta_time: float):
         # move all the asteroids
         for asteroid in self.asteroids:
-            asteroid.center_x += random.randint(-10, 10)
-            asteroid.center_y += random.randint(-10, 10)
+            self.physics_engine.apply_force(asteroid, [random.randint(-1, 1), random.randint(-1, 1)])
 
-        # decay the player velocity
-        self.player_velocity[0] *= 0.9
 
         # accelerate the player
-        self.player_velocity[0] += self.player_delta[0]
-        self.player_velocity[1] += self.player_delta[1] 
+        self.physics_engine.apply_impulse(self.player.sprite, self.player.acceleration)
 
-        # move the player
-        self.player_sprite.center_x += self.player_velocity[0]
-        self.player_sprite.center_y += self.player_velocity[1]
+        # run the physics update
+        self.physics_engine.step()
 
         # check for collisions
-        hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.asteroids)
+        hit_list = arcade.check_for_collision_with_list(self.player.sprite, self.asteroids)
 
         # if there is a collision, end the game
         if len(hit_list) > 0:
@@ -108,23 +123,23 @@ class PrimaryView(arcade.View):
             self.window.show_view("pause")
 
         if key == arcade.key.W:
-            self.player_delta[1] = 1
+            self.player.acceleration[1] = 1
         elif key == arcade.key.S:
-            self.player_delta[1] = -1
+            self.player.acceleration[1] = -1
         elif key == arcade.key.A:
-            self.player_delta[0] = -1
+            self.player.sprite.turn_left(1)
         elif key == arcade.key.D:
-            self.player_delta[0] = 1
+            self.player.sprite.turn_right(1)
 
     def on_key_release(self, key, modifiers):
         if key == arcade.key.W:
-            self.player_delta[1] = 0
+            self.player.acceleration[1] = 0
         elif key == arcade.key.S:
-            self.player_delta[1] = 0
+            self.player.acceleration[1] = 0
         elif key == arcade.key.A:
-            self.player_delta[0] = 0
+            self.player.acceleration[0] = 0
         elif key == arcade.key.D:
-            self.player_delta[0] = 0
+            self.player.acceleration[0] = 0
 
         
     
