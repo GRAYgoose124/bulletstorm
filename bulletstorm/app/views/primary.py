@@ -1,3 +1,5 @@
+import math
+import time
 import arcade
 import random
 from pathlib import Path
@@ -8,13 +10,18 @@ class Player:
         self.sprite = None
 
         self.hp = 100
+        self.last_hit = None
 
         self.acceleration = [0, 0]
         self.rotation = 0
 
     def reset(self):
+        self.hp = 100
+        self.last_hit = None
+
         self.acceleration = [0, 0]
         self.rotation = 0
+
 
 class PrimaryView(arcade.View):
     def __init__(self):
@@ -67,7 +74,7 @@ class PrimaryView(arcade.View):
 
         # Randomly generate the asteroids
         placed = [(self.player.sprite.center_x, self.player.sprite.center_y)]
-        n = 50
+        n = 100
         for _ in range(n):
             rx, ry = 0, 0
             while not all([((rx - x) ** 2 + (ry - y) ** 2) ** 0.5 > (width // n) for x, y in placed]):
@@ -96,13 +103,16 @@ class PrimaryView(arcade.View):
         self.asteroids.draw()
 
     def on_update(self, delta_time: float):
-        # move all the asteroids
-        for asteroid in self.asteroids:
-            self.physics_engine.apply_force(asteroid, [random.randint(-1, 1), random.randint(-1, 1)])
-
-
+        # rotate the player
+        if self.player.sprite.change_angle != 0:
+            self.physics_engine.get_physics_object(self.player.sprite).body.angle += self.player.sprite.change_angle
+            
         # accelerate the player
         self.physics_engine.apply_impulse(self.player.sprite, self.player.acceleration)
+
+        # move all the asteroids
+        for asteroid in self.asteroids:
+            self.physics_engine.apply_force(asteroid, [random.randint(-20, 20), random.randint(-10, 10)])
 
         # run the physics update
         self.physics_engine.step()
@@ -110,10 +120,15 @@ class PrimaryView(arcade.View):
         # check for collisions
         hit_list = arcade.check_for_collision_with_list(self.player.sprite, self.asteroids)
 
-        # if there is a collision, end the game
+        # damage player
         if len(hit_list) > 0:
-            print("STOP GETTING HIT STUPID")
-            # self.__end_game()
+            if self.player.last_hit is None or time.time() - self.player.last_hit > 1:
+                self.player.hp -= 10
+                self.player.last_hit = time.time()
+        
+        # check if player is dead
+        if self.player.hp <= 0:
+            self.__end_game()
 
     def on_resize(self, width: int, height: int):
         self.generate_level(width, height)
@@ -127,9 +142,13 @@ class PrimaryView(arcade.View):
         elif key == arcade.key.S:
             self.player.acceleration[1] = -1
         elif key == arcade.key.A:
-            self.player.sprite.turn_left(1)
+            self.player.acceleration[0] = -1
         elif key == arcade.key.D:
-            self.player.sprite.turn_right(1)
+            self.player.acceleration[0] = 1
+        elif key == arcade.key.Q:
+            self.player.sprite.change_angle = 0.02
+        elif key == arcade.key.E:
+            self.player.sprite.change_angle = -0.02
 
     def on_key_release(self, key, modifiers):
         if key == arcade.key.W:
@@ -140,6 +159,9 @@ class PrimaryView(arcade.View):
             self.player.acceleration[0] = 0
         elif key == arcade.key.D:
             self.player.acceleration[0] = 0
-
+        elif key == arcade.key.Q:
+            self.player.sprite.change_angle = 0
+        elif key == arcade.key.E:
+            self.player.sprite.change_angle = 0
         
     
