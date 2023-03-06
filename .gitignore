@@ -1,0 +1,7 @@
+*logs/
+*trained/
+**/__pycache__/
+*.yaml
+.vscode/
+*.lock
+*.pyc
