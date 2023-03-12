@@ -5,48 +5,7 @@ import random
 from pathlib import Path
 
 
-
-
-class Player:
-    DEFAULT_CONTROL_CONFIG = {
-        "PLAYER_FORWARD_ACCELERATION": 1,
-        "PLAYER_LATERAL_ACCELERATION": 1,
-        "PLAYER_TURN_VELOCITY": 0.02
-    }
-
-    KEY_MAP = {
-        "PLAYER_MOVE_FORWARD": arcade.key.W,
-        "PLAYER_MOVE_BACKWARD": arcade.key.S,
-        "PLAYER_MOVE_LEFT": arcade.key.A,
-        "PLAYER_MOVE_RIGHT": arcade.key.D,
-
-        "PLAYER_TURN_LEFT": arcade.key.Q,
-        "PLAYER_TURN_RIGHT": arcade.key.E,
-
-        "PLAYER_SHOOT": arcade.key.SPACE,
-
-        "PAUSE_MENU": arcade.key.ESCAPE
-    }
-
-    def __init__(self):
-        self.sprite = None
-
-        self.hp = 100
-        self.last_hit = None
-
-        self.acceleration = [0, 0]
-        self.rotation = 0
-
-        self.is_firing = False
-
-    def setup(self):
-        self.hp = 100
-        self.last_hit = None
-
-        self.acceleration = [0, 0]
-        self.rotation = 0
-
-        self.is_firing = False
+from ...game.entity import Player
 
 
 class PrimaryView(arcade.View):
@@ -70,9 +29,7 @@ class PrimaryView(arcade.View):
         self._restart = True
         self.__reset_game()
 
-    def generate_level(self, width, height):
-        self.physics_engine = arcade.PymunkPhysicsEngine()
-
+    def __spawn_player(self, width, height):
         # ship sheet has two sprites side by side
         root = Path(__file__).parent.parent.parent.parent / "assets" / "topdown-scifi" / "asteroid-fighter"
         self.player.sprite = arcade.Sprite(root / "ship.png", image_x=0, image_y=0, image_width=48, image_height=48)
@@ -83,6 +40,7 @@ class PrimaryView(arcade.View):
 
         self.physics_engine.add_sprite(self.player.sprite, mass=1)
 
+    def __generate_asteroids(self, width, height,):
         # Create the asteroids
         self.asteroids = arcade.SpriteList()
         asteroid_list = [
@@ -104,13 +62,30 @@ class PrimaryView(arcade.View):
         for _ in range(n):
             rx, ry = random.randint(0, width), random.randint(0, height)
             
-            asteroid = arcade.Sprite(random.choice(asteroid_list), 0.5)
+            asset = random.choice(asteroid_list)
+            asteroid = arcade.Sprite(asset, 0.5)
             asteroid.center_x = rx
             asteroid.center_y = ry
+            asteroid.velocity = (random.random() * 2 - 1) * 100, (random.random() * 2 - 1) * 100
             placed.append((rx, ry))
             self.asteroids.append(asteroid)
 
+        if "tiny" in asset:
+            m = 0.3
+        elif "small" in asset:
+            m = 0.6
+        elif "med" in asset:
+            m = 1.2
+        elif "big" in asset:
+            m = 2.4
+
         self.physics_engine.add_sprite_list(self.asteroids, mass=1)
+
+    def generate_level(self, width, height):
+        self.physics_engine = arcade.PymunkPhysicsEngine()
+
+        self.__spawn_player(width, height)
+        self.__generate_asteroids(width, height)
 
     def on_show(self):
         arcade.set_background_color(arcade.color.BLACK)
@@ -135,7 +110,14 @@ class PrimaryView(arcade.View):
 
         # move all the asteroids
         for asteroid in self.asteroids:
-            self.physics_engine.apply_force(asteroid, [random.randint(-20, 20), random.randint(-10, 10)])
+            current_vel = self.physics_engine.get_physics_object(asteroid).body.velocity
+            random_force = [random.uniform(-1, 1), random.uniform(-1, 1)]
+            force = [current_vel[0] * random.uniform(0.5, 1.5) or random_force[0], current_vel[1] * random.uniform(0.5, 1.5) or random_force[1]]
+
+            if (force[0]**2 + force[1]**2) > 100:
+                force = [0.0, 0.0]
+
+            self.physics_engine.apply_force(asteroid, force)
 
         # run the physics update
         self.physics_engine.step()
@@ -145,9 +127,7 @@ class PrimaryView(arcade.View):
 
         # damage player
         if len(hit_list) > 0:
-            if self.player.last_hit is None or time.time() - self.player.last_hit > 1:
-                self.player.hp -= 10
-                self.player.last_hit = time.time()
+            self.player.take_damage(10)
         
         # check if player is dead
         if self.player.hp <= 0:
@@ -162,25 +142,22 @@ class PrimaryView(arcade.View):
     def on_key_release(self, key, modifiers):
         self.__key_handler(key, modifiers, release=True)
 
-    def __key_handler(self, key, modifiers, config=None, release=False):
-        """ Unified key handler for key presses and releases. """
-        if config is None:
-            config = Player.DEFAULT_CONTROL_CONFIG
-    
-        if key == Player.KEY_MAP["PLAYER_MOVE_FORWARD"]:
-            self.player.acceleration[1] = 0 if release else config['PLAYER_FORWARD_ACCELERATION']
-        elif key == Player.KEY_MAP["PLAYER_MOVE_BACKWARD"]: 
-            self.player.acceleration[1] = 0 if release else -config['PLAYER_FORWARD_ACCELERATION']
-        elif key == Player.KEY_MAP["PLAYER_MOVE_LEFT"]:
-            self.player.acceleration[0] = 0 if release else -config['PLAYER_LATERAL_ACCELERATION']
-        elif key == Player.KEY_MAP["PLAYER_MOVE_RIGHT"]:
-            self.player.acceleration[0] = 0 if release else config['PLAYER_LATERAL_ACCELERATION']
-        elif key == Player.KEY_MAP["PLAYER_TURN_LEFT"]:
-            self.player.sprite.change_angle = 0 if release else config['PLAYER_TURN_VELOCITY']
-        elif key == Player.KEY_MAP["PLAYER_TURN_RIGHT"]:
-            self.player.sprite.change_angle = 0 if release else -config['PLAYER_TURN_VELOCITY']
-        elif key == Player.KEY_MAP["PLAYER_SHOOT"]:
+    def __key_handler(self, key, modifiers, release=False):
+        """ Unified key handler for key presses and releases. """    
+        if key == self.player.keybinds["PLAYER_MOVE_FORWARD"]:
+            self.player.acceleration[1] = 0 if release else self.player.keybind_settings['PLAYER_FORWARD_ACCELERATION']
+        elif key == self.player.keybinds["PLAYER_MOVE_BACKWARD"]:
+            self.player.acceleration[1] = 0 if release else -self.player.keybind_settings['PLAYER_FORWARD_ACCELERATION']
+        elif key == self.player.keybinds["PLAYER_MOVE_LEFT"]:
+            self.player.acceleration[0] = 0 if release else -self.player.keybind_settings['PLAYER_LATERAL_ACCELERATION']
+        elif key == self.player.keybinds["PLAYER_MOVE_RIGHT"]:
+            self.player.acceleration[0] = 0 if release else self.player.keybind_settings['PLAYER_LATERAL_ACCELERATION']
+        elif key == self.player.keybinds["PLAYER_TURN_LEFT"]:
+            self.player.sprite.change_angle = 0 if release else self.player.keybind_settings['PLAYER_TURN_VELOCITY']
+        elif key == self.player.keybinds["PLAYER_TURN_RIGHT"]:
+            self.player.sprite.change_angle = 0 if release else -self.player.keybind_settings['PLAYER_TURN_VELOCITY']
+        elif key == self.player.keybinds["PLAYER_SHOOT"]:
             self.player.is_firing = not release
-        elif key == Player.KEY_MAP["PAUSE_MENU"]:
+        elif key == self.player.keybinds["PAUSE_MENU"]:
             if not release:
                 self.window.show_view("pause")
