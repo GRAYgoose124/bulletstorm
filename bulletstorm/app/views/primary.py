@@ -5,7 +5,29 @@ import random
 from pathlib import Path
 
 
+
+
 class Player:
+    DEFAULT_CONTROL_CONFIG = {
+        "PLAYER_FORWARD_ACCELERATION": 1,
+        "PLAYER_LATERAL_ACCELERATION": 1,
+        "PLAYER_TURN_VELOCITY": 0.02
+    }
+
+    KEY_MAP = {
+        "PLAYER_MOVE_FORWARD": arcade.key.W,
+        "PLAYER_MOVE_BACKWARD": arcade.key.S,
+        "PLAYER_MOVE_LEFT": arcade.key.A,
+        "PLAYER_MOVE_RIGHT": arcade.key.D,
+
+        "PLAYER_TURN_LEFT": arcade.key.Q,
+        "PLAYER_TURN_RIGHT": arcade.key.E,
+
+        "PLAYER_SHOOT": arcade.key.SPACE,
+
+        "PAUSE_MENU": arcade.key.ESCAPE
+    }
+
     def __init__(self):
         self.sprite = None
 
@@ -15,12 +37,16 @@ class Player:
         self.acceleration = [0, 0]
         self.rotation = 0
 
-    def reset(self):
+        self.is_firing = False
+
+    def setup(self):
         self.hp = 100
         self.last_hit = None
 
         self.acceleration = [0, 0]
         self.rotation = 0
+
+        self.is_firing = False
 
 
 class PrimaryView(arcade.View):
@@ -76,9 +102,7 @@ class PrimaryView(arcade.View):
         placed = [(self.player.sprite.center_x, self.player.sprite.center_y)]
         n = 100
         for _ in range(n):
-            rx, ry = 0, 0
-            while not all([((rx - x) ** 2 + (ry - y) ** 2) ** 0.5 > (width // n) for x, y in placed]):
-                rx, ry = random.randint(0, width), random.randint(0, height)
+            rx, ry = random.randint(0, width), random.randint(0, height)
             
             asteroid = arcade.Sprite(random.choice(asteroid_list), 0.5)
             asteroid.center_x = rx
@@ -87,7 +111,6 @@ class PrimaryView(arcade.View):
             self.asteroids.append(asteroid)
 
         self.physics_engine.add_sprite_list(self.asteroids, mass=1)
-
 
     def on_show(self):
         arcade.set_background_color(arcade.color.BLACK)
@@ -134,34 +157,30 @@ class PrimaryView(arcade.View):
         self.generate_level(width, height)
 
     def on_key_press(self, key, modifiers):
-        if key == arcade.key.ESCAPE:
-            self.window.show_view("pause")
-
-        if key == arcade.key.W:
-            self.player.acceleration[1] = 1
-        elif key == arcade.key.S:
-            self.player.acceleration[1] = -1
-        elif key == arcade.key.A:
-            self.player.acceleration[0] = -1
-        elif key == arcade.key.D:
-            self.player.acceleration[0] = 1
-        elif key == arcade.key.Q:
-            self.player.sprite.change_angle = 0.02
-        elif key == arcade.key.E:
-            self.player.sprite.change_angle = -0.02
+        self.__key_handler(key, modifiers)
 
     def on_key_release(self, key, modifiers):
-        if key == arcade.key.W:
-            self.player.acceleration[1] = 0
-        elif key == arcade.key.S:
-            self.player.acceleration[1] = 0
-        elif key == arcade.key.A:
-            self.player.acceleration[0] = 0
-        elif key == arcade.key.D:
-            self.player.acceleration[0] = 0
-        elif key == arcade.key.Q:
-            self.player.sprite.change_angle = 0
-        elif key == arcade.key.E:
-            self.player.sprite.change_angle = 0
-        
+        self.__key_handler(key, modifiers, release=True)
+
+    def __key_handler(self, key, modifiers, config=None, release=False):
+        """ Unified key handler for key presses and releases. """
+        if config is None:
+            config = Player.DEFAULT_CONTROL_CONFIG
     
+        if key == Player.KEY_MAP["PLAYER_MOVE_FORWARD"]:
+            self.player.acceleration[1] = 0 if release else config['PLAYER_FORWARD_ACCELERATION']
+        elif key == Player.KEY_MAP["PLAYER_MOVE_BACKWARD"]: 
+            self.player.acceleration[1] = 0 if release else -config['PLAYER_FORWARD_ACCELERATION']
+        elif key == Player.KEY_MAP["PLAYER_MOVE_LEFT"]:
+            self.player.acceleration[0] = 0 if release else -config['PLAYER_LATERAL_ACCELERATION']
+        elif key == Player.KEY_MAP["PLAYER_MOVE_RIGHT"]:
+            self.player.acceleration[0] = 0 if release else config['PLAYER_LATERAL_ACCELERATION']
+        elif key == Player.KEY_MAP["PLAYER_TURN_LEFT"]:
+            self.player.sprite.change_angle = 0 if release else config['PLAYER_TURN_VELOCITY']
+        elif key == Player.KEY_MAP["PLAYER_TURN_RIGHT"]:
+            self.player.sprite.change_angle = 0 if release else -config['PLAYER_TURN_VELOCITY']
+        elif key == Player.KEY_MAP["PLAYER_SHOOT"]:
+            self.player.is_firing = not release
+        elif key == Player.KEY_MAP["PAUSE_MENU"]:
+            if not release:
+                self.window.show_view("pause")
