@@ -12,6 +12,7 @@ from ...game.level import Level
 class PrimaryView(arcade.View):
     def __init__(self):
         super().__init__()
+        self._game_over = False
         self._restart = False
 
         self.player = None
@@ -20,15 +21,17 @@ class PrimaryView(arcade.View):
         self.setup()
 
     def setup(self):
+        self._game_over = False
         self._restart = False
         self.player = Player()
         self.level = Level(self)
 
-    def __end_game(self):
+    def end_game(self):
+        self._game_over = time.time()
         self.window.show_view("game_over")
 
-    def __restart_game(self):
-        self.__end_game()
+    def restart_game(self):
+        self.end_game()
         self._restart = True
 
         self.setup()
@@ -58,19 +61,23 @@ class PrimaryView(arcade.View):
         self.__key_handler(key, modifiers, release=True)
 
     def __key_handler(self, key, modifiers, release=False):
-        """ Unified key handler for key presses and releases. """    
+        """ Unified key handler for key presses and releases. """
         if key == self.player.keybinds["PLAYER_MOVE_FORWARD"]:
             self.player.acceleration[1] = 0 if release else self.player.keybind_settings['PLAYER_FORWARD_ACCELERATION']
         elif key == self.player.keybinds["PLAYER_MOVE_BACKWARD"]:
-            self.player.acceleration[1] = 0 if release else -self.player.keybind_settings['PLAYER_FORWARD_ACCELERATION']
+            self.player.acceleration[1] = 0 if release else - \
+                self.player.keybind_settings['PLAYER_FORWARD_ACCELERATION']
         elif key == self.player.keybinds["PLAYER_MOVE_LEFT"]:
-            self.player.acceleration[0] = 0 if release else -self.player.keybind_settings['PLAYER_LATERAL_ACCELERATION']
+            self.player.acceleration[0] = 0 if release else - \
+                self.player.keybind_settings['PLAYER_LATERAL_ACCELERATION']
         elif key == self.player.keybinds["PLAYER_MOVE_RIGHT"]:
             self.player.acceleration[0] = 0 if release else self.player.keybind_settings['PLAYER_LATERAL_ACCELERATION']
         elif key == self.player.keybinds["PLAYER_TURN_LEFT"]:
-            self.player.sprite.change_angle = 0 if release else self.player.keybind_settings['PLAYER_TURN_VELOCITY']
+            self.player.sprite.change_angle = 0 if release else self.player.keybind_settings[
+                'PLAYER_TURN_VELOCITY']
         elif key == self.player.keybinds["PLAYER_TURN_RIGHT"]:
-            self.player.sprite.change_angle = 0 if release else -self.player.keybind_settings['PLAYER_TURN_VELOCITY']
+            self.player.sprite.change_angle = 0 if release else - \
+                self.player.keybind_settings['PLAYER_TURN_VELOCITY']
         elif key == self.player.keybinds["PLAYER_SHOOT"]:
             self.player.is_firing = not release
         elif key == self.player.keybinds["PAUSE_MENU"]:

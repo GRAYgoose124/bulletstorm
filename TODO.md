@@ -1,0 +1,3 @@
+- [ ] Rather than removing all angular velocity, we should subtract the turning from it.
+- [ ] Collision handler for player?
+- [ ] Screen wrapping and scrolling modes

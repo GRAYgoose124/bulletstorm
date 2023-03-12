@@ -13,9 +13,7 @@ class Level:
         self.size = None
         self.resize(*parent.window.get_size())
 
-        self.setup(*self.size)
-
-    def setup(self, width, height):
+    def setup(self):
         self.physics_engine = arcade.PymunkPhysicsEngine()
 
         self.__spawn_player()
@@ -24,10 +22,14 @@ class Level:
     def resize(self, width, height):
         self.size = (width, height)
 
+        self.setup()
+
     def __spawn_player(self, position: tuple[int, int] = None, mass=1.0):
         # ship sheet has two sprites side by side
-        root = Path(__file__).parent.parent.parent / "assets" / "topdown-scifi" / "asteroid-fighter"
-        self.player.sprite = arcade.Sprite(root / "ship.png", image_x=0, image_y=0, image_width=48, image_height=48)
+        root = Path(__file__).parent.parent.parent / "assets" / \
+            "topdown-scifi" / "asteroid-fighter"
+        self.player.sprite = arcade.Sprite(
+            root / "ship.png", image_x=0, image_y=0, image_width=48, image_height=48)
 
         # Set the player in the center
         if position is None:
@@ -58,41 +60,59 @@ class Level:
         # Randomly generate the asteroids
         placed = [(self.player.sprite.center_x, self.player.sprite.center_y)]
         n = 100
+        n_dist = n * 10
+        max_tries = n // 2
         for _ in range(n):
-            rx, ry = random.randint(0, self.size[0]), random.randint(0, self.size[1])
-            
+            # Try to place the asteroid at a random location
+            rx, ry = 0, 0
+            tries = 0
+            while not all([((rx - x) ** 2 + (ry - y) ** 2) ** 0.5 > (self.size[0] // n_dist) for x, y in placed]) and tries < max_tries:
+                rx, ry = random.randint(
+                    0, self.size[0]), random.randint(0, self.size[1])
+                tries += 1
+
+            # Create the asteroid
             asset = random.choice(asteroid_list)
             asteroid = arcade.Sprite(asset, 0.5)
             asteroid.center_x = rx
             asteroid.center_y = ry
-            asteroid.velocity = (random.random() * 2 - 1) * 100, (random.random() * 2 - 1) * 100
-            placed.append((rx, ry))
+            asteroid.velocity = [random.uniform(-1, 1), random.uniform(-1, 1)]
+
+            if "tiny" in asset:
+                m = 0.3
+            elif "small" in asset:
+                m = 0.7
+            elif "med" in asset:
+                m = 1.5
+            elif "big" in asset:
+                m = 3.3
+
+            # Add the asteroid to the physics engine
+            self.physics_engine.add_sprite(asteroid, mass=m)
+            # TODO: add a collision handler for the asteroids and the player?
             self.asteroids.append(asteroid)
-
-        if "tiny" in asset:
-            m = 0.3
-        elif "small" in asset:
-            m = 0.6
-        elif "med" in asset:
-            m = 1.2
-        elif "big" in asset:
-            m = 2.4
-
-        self.physics_engine.add_sprite_list(self.asteroids, mass=m)
+            placed.append((rx, ry))
 
     def update(self, delta_time: float):
         # rotate the player
         if self.player.sprite.change_angle != 0:
-            self.physics_engine.get_physics_object(self.player.sprite).body.angle += self.player.sprite.change_angle
+            body = self.physics_engine.get_physics_object(
+                self.player.sprite).body
+            body.angle += self.player.sprite.change_angle
+            # zero rotation in body acceleration
+            body.angular_velocity = 0
 
         # accelerate the player
-        self.physics_engine.apply_impulse(self.player.sprite, self.player.acceleration)
+        self.physics_engine.apply_impulse(
+            self.player.sprite, self.player.acceleration)
 
         # move all the asteroids
         for asteroid in self.asteroids:
-            current_vel = self.physics_engine.get_physics_object(asteroid).body.velocity
+            current_vel = self.physics_engine.get_physics_object(
+                asteroid).body.velocity
             random_force = [random.uniform(-1, 1), random.uniform(-1, 1)]
-            force = [current_vel[0] * random.uniform(0.5, 1.5) or random_force[0], current_vel[1] * random.uniform(0.5, 1.5) or random_force[1]]
+            force = [current_vel[0] * random.uniform(
+                0.5, 1.5) or random_force[0], current_vel[1] * random.uniform(0.5, 1.5) or random_force[1]]
 
             if (force[0]**2 + force[1]**2) > 100:
                 force = [0.0, 0.0]
@@ -103,11 +123,13 @@ class Level:
         self.physics_engine.step()
 
         # check for collisions
-        hit_list = arcade.check_for_collision_with_list(self.player.sprite, self.asteroids)
+        # TODO: add a collision handler for the asteroids and the player?
+        hit_list = arcade.check_for_collision_with_list(
+            self.player.sprite, self.asteroids)
 
         # damage player
         if len(hit_list) > 0:
-            self.player.take_damage(10)
+            self.player.take_damage(25)
 
         # check if player is dead
         if self.player.hp <= 0:

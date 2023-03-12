@@ -3,17 +3,14 @@ import arcade
 from .views import *
 
 
-
-
-
 class BulletStorm(arcade.Window):
     def __init__(self):
-        super().__init__(1280, 720, 
-                         "B. S. - Time to get your degree", 
-                         gl_version=(4, 3), 
+        super().__init__(1280, 720,
+                         "B. S. - Time to get your degree",
+                         gl_version=(4, 3),
                          resizable=True)
         self.center_window()
-        
+
         self._views = {
             "primary": PrimaryView(),
             "pause": PauseView(),
@@ -31,10 +28,10 @@ class BulletStorm(arcade.Window):
     def show_view(self, view):
         if view not in self.views:
             raise ValueError(f"View '{view}' does not exist.")
-        
+
         # get the key of the current view
-        if (self._current_view is not None and 
-            type(self._current_view) in [type(x) for x in self._views.values()]):
+        if (self._current_view is not None and
+                type(self._current_view) in [type(x) for x in self._views.values()]):
             key = {v: k for k, v in self._views.items()}[self._current_view]
             self._last_view = key
 

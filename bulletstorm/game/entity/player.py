@@ -34,7 +34,7 @@ class Player:
 
         self.is_firing = False
 
-        self._settings = { 
+        self._settings = {
             "keybinds": self.DEFAULT_KEYBINDS,
             "keybind_settings": self.DEFAULT_CONTROL_CONFIG
         }
@@ -46,7 +46,7 @@ class Player:
     @property
     def keybind_settings(self):
         return self._settings['keybind_settings']
-    
+
     @property
     def keybinds(self):
         return self._settings['keybinds']
@@ -61,7 +61,7 @@ class Player:
         self.is_firing = False
 
     def take_damage(self, damage=1, cooldown=1.0):
-        t = time.time() 
+        t = time.time()
         if self.last_hit is None or t - self.last_hit > cooldown:
             self.hp -= damage
             self.last_hit = t
