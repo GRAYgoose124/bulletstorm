@@ -8,7 +8,9 @@ class Player(Entity):
     DEFAULT_CONTROL_CONFIG = {
         "PLAYER_FORWARD_ACCELERATION": 1,
         "PLAYER_LATERAL_ACCELERATION": 1,
-        "PLAYER_TURN_VELOCITY": 0.035
+        "PLAYER_TURN_VELOCITY": 0.01,
+        "PLAYER_MAX_TURN_VELOCITY": 50.0,
+        "PLAYER_SHOOT_COOLDOWN": 0.5,
     }
 
     DEFAULT_KEYBINDS = {
@@ -33,7 +35,7 @@ class Player(Entity):
         self.last_hit = None
 
         self.acceleration = [0, 0]
-        self.rotation = 0
+        self.angular_acc = 0
 
         self.is_firing = False
 
@@ -59,7 +61,7 @@ class Player(Entity):
         self.last_hit = None
 
         self.acceleration = [0, 0]
-        self.rotation = 0
+        self.angular_acc = 0
 
         self.is_firing = False
 
@@ -68,13 +70,14 @@ class Player(Entity):
             body = self.manager.get_physics_object(
                 self).body
             
-            body.angle += self.change_angle
-            # zero rotation in body acceleration
-            body.angular_velocity = 0
+            self.angular_acc += self.change_angle * 1/(1+abs(self.angular_acc))
+            body.angular_velocity += self.angular_acc
+            if abs(body.angular_velocity) > self.keybind_settings['PLAYER_MAX_TURN_VELOCITY']:
+                body.angular_velocity = self.keybind_settings['PLAYER_MAX_TURN_VELOCITY'] * (body.angular_velocity / abs(body.angular_velocity))
 
-        # accelerate the player
-        self.manager.apply_impulse(
-            self, self.acceleration)
+            body.angular_velocity *= .9
+
+        self.manager.apply_impulse(self, self.acceleration)
 
     def take_damage(self, damage=1, cooldown=1.0):
         t = time.time()
