@@ -3,6 +3,7 @@ import random
 from pathlib import Path
 
 from bulletstorm.game.entity import Entity, EntityManager, Player
+from bulletstorm.game.entity.manager import EntityAlreadyRemovedError
 
 
 class Level:
@@ -38,7 +39,7 @@ class Level:
     def __spawn_player(self, position: tuple[int, int] = None, mass=1.0):
         # ship sheet has two sprites side by side
         # TODO move into player class and preserve game player
-        root = Path(__file__).parent.parent.parent / "assets" / \
+        root = Path(__file__).parent.parent.parent.parent / "assets" / \
             "topdown-scifi" / "asteroid-fighter"
         self.player = Player(
             root / "ship.png", image_x=0, image_y=0, image_width=48, image_height=48)
@@ -52,10 +53,8 @@ class Level:
             self.player.center_y = position[1]
 
         self.entity_manager.add_entity(self.player, mass=mass, tag="player",
-                                       collision_type="player", collision_type_b="default")
+                                       collision_type="player", collision_type_b="enemy")
         
-        self.entity_manager.add_collision_handler("player", "default", self.player.collision_handler)
-
     def __generate_asteroids(self):
         # Create the asteroids
         asteroid_list = [
@@ -87,9 +86,7 @@ class Level:
 
             # Create the asteroid
             asset = random.choice(asteroid_list)
-            asteroid = Entity(asset, 0.5)
-            asteroid.center_x = rx
-            asteroid.center_y = ry
+            asteroid = Entity(asset, 0.5, center_x=rx, center_y=ry)
             asteroid.velocity = [random.uniform(-1, 1), random.uniform(-1, 1)]
 
             if "tiny" in asset:
@@ -101,16 +98,18 @@ class Level:
             elif "big" in asset:
                 m = 3.3
 
-            # Add the asteroid to the physics engine
-            self.entity_manager.add_entity(asteroid, tag="asteroid", mass=m)
-            # TODO: add a collision handler for the asteroids and the player?
+            self.entity_manager.add_entity(asteroid, tag="asteroid", collision_type="enemy", mass=m)
             placed.append((rx, ry))
 
     def update(self, delta_time: float):
         # move all the asteroids
         for asteroid in self.entity_manager.by_tag("asteroid"):
-            current_vel = self.entity_manager.get_physics_object(
-                asteroid).body.velocity
+            try:
+                current_vel = self.entity_manager.get_physics_object(
+                    asteroid).body.velocity
+            except EntityAlreadyRemovedError:
+                continue
+
             random_force = [random.uniform(-1, 1), random.uniform(-1, 1)]
             force = [current_vel[0] * random.uniform(
                 0.5, 1.5) or random_force[0], current_vel[1] * random.uniform(0.5, 1.5) or random_force[1]]

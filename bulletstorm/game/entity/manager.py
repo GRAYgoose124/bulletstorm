@@ -2,6 +2,9 @@ import arcade
 
 from .entity import Entity
 
+class EntityAlreadyRemovedError(Exception):
+    pass
+
 class EntityManager(arcade.PymunkPhysicsEngine):
     def __init__(self) -> None:
         super().__init__()
@@ -30,9 +33,17 @@ class EntityManager(arcade.PymunkPhysicsEngine):
         entity.tag = tag
 
     def remove_entity(self, entity: Entity, *args, **kwargs):
-        self.remove_sprite(entity, *args, **kwargs)
-        self._sprite_list.remove(entity)
-        # remove from tag dict
+        try:
+            self.remove_sprite(entity, *args, **kwargs)
+            self._sprite_list.remove(entity)
+        except KeyError:
+            pass
+
+    def get_physics_object(self, sprite: arcade.Sprite) -> arcade.PymunkPhysicsObject:
+        try:
+            return super().get_physics_object(sprite)
+        except KeyError:
+            raise EntityAlreadyRemovedError("Entity has already been removed")
 
     def step(self, delta_time):
         for entity in self._sprite_list:

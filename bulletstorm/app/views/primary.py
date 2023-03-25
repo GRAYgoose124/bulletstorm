@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 from ...game.entity import Player
-from ...game.level import Level
+from ...game.levels.level import Level
 
 
 class PrimaryView(arcade.View):
@@ -79,7 +79,8 @@ class PrimaryView(arcade.View):
             self.player.change_angle = 0 if release else - \
                 self.player.keybind_settings['PLAYER_TURN_VELOCITY']
         elif key == self.player.keybinds["PLAYER_SHOOT"]:
-            self.player.is_firing = not release
+            # self.player.is_firing = not release
+            self.player.shoot()
         elif key == self.player.keybinds["PAUSE_MENU"]:
             if not release:
                 self.window.show_view("pause")
