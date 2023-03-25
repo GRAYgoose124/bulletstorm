@@ -73,10 +73,10 @@ class PrimaryView(arcade.View):
         elif key == self.player.keybinds["PLAYER_MOVE_RIGHT"]:
             self.player.acceleration[0] = 0 if release else self.player.keybind_settings['PLAYER_LATERAL_ACCELERATION']
         elif key == self.player.keybinds["PLAYER_TURN_LEFT"]:
-            self.player.sprite.change_angle = 0 if release else self.player.keybind_settings[
+            self.player.change_angle = 0 if release else self.player.keybind_settings[
                 'PLAYER_TURN_VELOCITY']
         elif key == self.player.keybinds["PLAYER_TURN_RIGHT"]:
-            self.player.sprite.change_angle = 0 if release else - \
+            self.player.change_angle = 0 if release else - \
                 self.player.keybind_settings['PLAYER_TURN_VELOCITY']
         elif key == self.player.keybinds["PLAYER_SHOOT"]:
             self.player.is_firing = not release
