@@ -11,7 +11,7 @@ class Entity(arcade.Sprite):
 
         # game data
         self.hp = 5
-        self.cooldown = None
+        self.cooldown = 0
         self.is_firing = False
 
         # physics data
@@ -31,12 +31,14 @@ class Entity(arcade.Sprite):
         return True
 
     def update(self, delta_time):
-        if self.cooldown is not None:
+        if self.cooldown > 0:
             self.cooldown -= delta_time
             if self.cooldown <= 0:
-                self.cooldown = None
+                self.cooldown = 0
+
+        super().update()
 
     def take_damage(self, damage=1, cooldown=1.0):
-        if self.cooldown is None:
+        if self.cooldown <= 0 or cooldown <= 0:
             self.hp -= damage
-            self.cooldown = cooldown
+            self.cooldown += cooldown

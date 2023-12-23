@@ -2,8 +2,10 @@ import arcade
 import random
 from pathlib import Path
 
-from bulletstorm.game.entity import Entity, EntityManager, Player
+from bulletstorm.game.entity import EntityManager, Player
 from bulletstorm.game.entity.core.manager import EntityAlreadyRemovedError
+
+from bulletstorm.game.entity.asteroid import Asteroid
 
 
 class SpaceLevel:
@@ -106,7 +108,7 @@ class SpaceLevel:
 
             # Create the asteroid
             asset = random.choice(asteroid_list)
-            asteroid = Entity(asset, 0.5, center_x=rx, center_y=ry)
+            asteroid = Asteroid(asset, 0.5, center_x=rx, center_y=ry)
             asteroid.velocity = [random.uniform(-1, 1), random.uniform(-1, 1)]
 
             if "tiny" in asset:

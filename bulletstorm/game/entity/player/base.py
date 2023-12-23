@@ -48,10 +48,19 @@ class Player(Entity):
 
     def shockline(self):
         for a, b in self.manager.connected_entities:
+            target = None
             if a == self:
-                b.take_damage(10)
+                target = b
             elif b == self:
-                a.take_damage(10)
+                target = a
+
+            if target is None:
+                continue
+
+            # if we kill the enemy, heal
+            target.take_damage(3)
+            if target.hp <= 0:
+                self.hp += 1
 
     def update(self, delta_time):
         body = self.manager.get_physics_object(self).body
@@ -73,7 +82,6 @@ class Player(Entity):
         self.manager.apply_impulse(self, self.acceleration)
 
     def collision_handler(self, sprite_a, sprite_b, arbiter, space, data):
-        self.take_damage(10)
         return True
 
     def key_handler(self, key, modifiers, release=False):

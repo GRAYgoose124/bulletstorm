@@ -34,6 +34,8 @@ class Widget:
         self.button_message = ""
 
     def draw(self):
+        imgui.set_next_window_position(self.gui.rel(-32, -32), imgui.ONCE)
+        imgui.set_next_window_size(*self.gui.percent_of(0.25, 0.25), imgui.ONCE)
         with imgui.begin("Example: buttons"):
             if imgui.button("Button 1"):
                 self.button_message = "You pressed 1!"
@@ -68,9 +70,6 @@ class Page(arcade.View):
 
             self.draw_mainmenu()
             self.draw_navbar()
-
-            imgui.set_next_window_position(288, 32, imgui.ONCE)
-            imgui.set_next_window_size(512, 512, imgui.ONCE)
 
             self.gui_draw()
 

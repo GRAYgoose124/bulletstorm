@@ -1,4 +1,5 @@
 import arcade
+import logging
 
 from .base import Entity
 
@@ -13,7 +14,7 @@ class EntityManager(arcade.PymunkPhysicsEngine):
         self._entity_list = arcade.SpriteList()
         self._entity_tags = {}
 
-        self.connected_entities = []
+        self.connected_entities = set()
 
     @property
     def entities(self):
@@ -23,15 +24,23 @@ class EntityManager(arcade.PymunkPhysicsEngine):
         return self._entity_tags.get(tag, [])
 
     def add_entity(
-        self, entity: Entity, *args, tag="entity", collision_type_b=None, **kwargs
+        self,
+        entity: Entity,
+        *args,
+        tag="entity",
+        collision_type=None,
+        collision_type_b=None,
+        **kwargs
     ):
-        if collision_type_b is not None:
-            a, b = kwargs["collision_type"], collision_type_b
-            if a is None:
-                raise ValueError(
-                    "collision_type must be set if collision_type_b is set"
-                )
-            self.add_collision_handler(a, b, entity.collision_handler)
+        if collision_type is not None:
+            kwargs["collision_type"] = collision_type
+
+            if collision_type_b is None:
+                collision_type_b = collision_type
+
+            self.add_collision_handler(
+                collision_type, collision_type_b, entity.collision_handler
+            )
 
         self.add_sprite(entity, *args, **kwargs)
         self._entity_list.append(entity)
@@ -45,13 +54,13 @@ class EntityManager(arcade.PymunkPhysicsEngine):
             self.remove_sprite(entity, *args, **kwargs)
             self._entity_list.remove(entity)
             # remove connected entities
-            index = 0
-            while index < len(self.connected_entities):
-                a, b = self.connected_entities[index]
+            # find set entries that contain entity
+            to_remove = set()
+            for a, b in self.connected_entities:
                 if a == entity or b == entity:
-                    del self.connected_entities[index]
-                else:
-                    index += 1
+                    to_remove.add((a, b))
+            for e in to_remove:
+                self.connected_entities.remove(e)
 
         except KeyError:
             pass
@@ -71,7 +80,24 @@ class EntityManager(arcade.PymunkPhysicsEngine):
         super().step(delta_time)
 
     def add_line_between(self, entity_a: Entity, entity_b: Entity):
-        self.connected_entities.append((entity_a, entity_b))
+        pair = (entity_a, entity_b)
+        if pair not in self.connected_entities:
+            self.connected_entities.add(pair)
+
+    def has_line(self, entity: Entity):
+        for a, b in self.connected_entities:
+            if a == entity or b == entity:
+                return True
+        return False
+
+    def is_connected(self, entity_a: Entity, entity_b: Entity):
+        if any(
+            [
+                (a == entity_a and b == entity_b) or (a == entity_b and b == entity_a)
+                for a, b in self.connected_entities
+            ]
+        ):
+            return True
 
     def draw(self):
         for entity_a, entity_b in self.connected_entities:
