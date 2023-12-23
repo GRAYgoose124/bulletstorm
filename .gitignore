@@ -5,3 +5,4 @@
 .vscode/
 *.lock
 *.pyc
+imgui.ini

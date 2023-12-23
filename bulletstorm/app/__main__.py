@@ -1,10 +1,11 @@
 import arcade
 
-from .app import BulletStorm
+from .window import BulletStorm
 
 
 def main():
     app = BulletStorm()
+
     arcade.run()
 
 

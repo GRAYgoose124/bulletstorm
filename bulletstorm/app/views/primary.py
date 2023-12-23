@@ -1,22 +1,25 @@
 import math
 import time
 import arcade
+import imgui
 import random
 from pathlib import Path
 
-
+from ...app.gui.page import Page
 from ...game.entity import Player
 from ...game.levels.level import Level
 
 
-class PrimaryView(arcade.View):
-    def __init__(self):
-        super().__init__()
+class PrimaryView(Page):
+    def __init__(self, window, name="primary", title="Primary"):
+        super().__init__(window, name, title)
         self._game_over = False
         self._restart = False
 
         self.player = None
         self.level = None
+
+        self.button_message = ""
 
         self.setup()
 
@@ -43,16 +46,26 @@ class PrimaryView(arcade.View):
             self.level.setup(*self.window.get_size())
             self._restart = False
 
-    def on_draw(self):
-        arcade.start_render()
-
+    def game_draw(self):
         self.level.draw()
+
+    def draw(self):
+        """Page method"""
+        imgui.begin("Example: buttons")
+        if imgui.button("Button 1"):
+            self.button_message = "You pressed 1!"
+        if imgui.button("Button 2"):
+            self.button_message = "You pressed 2!"
+        imgui.text(self.button_message)
+        imgui.end()
 
     def on_update(self, delta_time: float):
         self.level.update(delta_time)
+        super().on_update(delta_time)
 
     def on_resize(self, width: int, height: int):
         self.level.resize(width, height)
+        super().on_resize(width, height)
 
     def on_key_press(self, key, modifiers):
         self.__key_handler(key, modifiers)
@@ -61,26 +74,9 @@ class PrimaryView(arcade.View):
         self.__key_handler(key, modifiers, release=True)
 
     def __key_handler(self, key, modifiers, release=False):
-        """ Unified key handler for key presses and releases. """
-        if key == self.player.keybinds["PLAYER_MOVE_FORWARD"]:
-            self.player.acceleration[1] = 0 if release else self.player.keybind_settings['PLAYER_FORWARD_ACCELERATION']
-        elif key == self.player.keybinds["PLAYER_MOVE_BACKWARD"]:
-            self.player.acceleration[1] = 0 if release else - \
-                self.player.keybind_settings['PLAYER_FORWARD_ACCELERATION']
-        elif key == self.player.keybinds["PLAYER_MOVE_LEFT"]:
-            self.player.acceleration[0] = 0 if release else - \
-                self.player.keybind_settings['PLAYER_LATERAL_ACCELERATION']
-        elif key == self.player.keybinds["PLAYER_MOVE_RIGHT"]:
-            self.player.acceleration[0] = 0 if release else self.player.keybind_settings['PLAYER_LATERAL_ACCELERATION']
-        elif key == self.player.keybinds["PLAYER_TURN_LEFT"]:
-            self.player.change_angle = 0 if release else self.player.keybind_settings[
-                'PLAYER_TURN_VELOCITY']
-        elif key == self.player.keybinds["PLAYER_TURN_RIGHT"]:
-            self.player.change_angle = 0 if release else - \
-                self.player.keybind_settings['PLAYER_TURN_VELOCITY']
-        elif key == self.player.keybinds["PLAYER_SHOOT"]:
-            # self.player.is_firing = not release
-            self.player.shoot()
-        elif key == self.player.keybinds["PAUSE_MENU"]:
+        """Unified key handler for key presses and releases."""
+        self.player.key_handler(key, modifiers, release=release)
+
+        if key == self.player.keybinds.PAUSE_MENU:
             if not release:
                 self.window.show_view("pause")
