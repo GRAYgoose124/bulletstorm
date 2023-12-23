@@ -3,10 +3,10 @@ import random
 from pathlib import Path
 
 from bulletstorm.game.entity import Entity, EntityManager, Player
-from bulletstorm.game.entity.manager import EntityAlreadyRemovedError
+from bulletstorm.game.entity.core.manager import EntityAlreadyRemovedError
 
 
-class Level:
+class SpaceLevel:
     def __init__(self, parent):
         self.parent = parent
 
@@ -30,7 +30,7 @@ class Level:
     @property
     def player(self):
         return self._player
-    
+
     @player.setter
     def player(self, value):
         self._player = value
@@ -39,10 +39,15 @@ class Level:
     def __spawn_player(self, position: tuple[int, int] = None, mass=1.0):
         # ship sheet has two sprites side by side
         # TODO move into player class and preserve game player
-        root = Path(__file__).parent.parent.parent.parent / "assets" / \
-            "topdown-scifi" / "asteroid-fighter"
+        root = (
+            Path(__file__).parent.parent.parent.parent
+            / "assets"
+            / "topdown-scifi"
+            / "asteroid-fighter"
+        )
         self.player = Player(
-            root / "ship.png", image_x=0, image_y=0, image_width=48, image_height=48)
+            root / "ship.png", image_x=0, image_y=0, image_width=48, image_height=48
+        )
 
         # Set the player in the center
         if position is None:
@@ -52,9 +57,14 @@ class Level:
             self.player.center_x = position[0]
             self.player.center_y = position[1]
 
-        self.entity_manager.add_entity(self.player, mass=mass, tag="player",
-                                       collision_type="player", collision_type_b="enemy")
-        
+        self.entity_manager.add_entity(
+            self.player,
+            mass=mass,
+            tag="player",
+            collision_type="player",
+            collision_type_b="enemy",
+        )
+
     def __generate_asteroids(self):
         # Create the asteroids
         asteroid_list = [
@@ -79,9 +89,19 @@ class Level:
             # Try to place the asteroid at a random location
             rx, ry = 0, 0
             tries = 0
-            while not all([((rx - x) ** 2 + (ry - y) ** 2) ** 0.5 > (self.size[0] // n_dist) for x, y in placed]) and tries < max_tries:
-                rx, ry = random.randint(
-                    0, self.size[0]), random.randint(0, self.size[1])
+            while (
+                not all(
+                    [
+                        ((rx - x) ** 2 + (ry - y) ** 2) ** 0.5
+                        > (self.size[0] // n_dist)
+                        for x, y in placed
+                    ]
+                )
+                and tries < max_tries
+            ):
+                rx, ry = random.randint(0, self.size[0]), random.randint(
+                    0, self.size[1]
+                )
                 tries += 1
 
             # Create the asteroid
@@ -98,7 +118,9 @@ class Level:
             elif "big" in asset:
                 m = 3.3
 
-            self.entity_manager.add_entity(asteroid, tag="asteroid", collision_type="enemy", mass=m)
+            self.entity_manager.add_entity(
+                asteroid, tag="asteroid", collision_type="enemy", mass=m
+            )
             placed.append((rx, ry))
 
     def update(self, delta_time: float):
@@ -106,15 +128,18 @@ class Level:
         for asteroid in self.entity_manager.by_tag("asteroid"):
             try:
                 current_vel = self.entity_manager.get_physics_object(
-                    asteroid).body.velocity
+                    asteroid
+                ).body.velocity
             except EntityAlreadyRemovedError:
                 continue
 
             random_force = [random.uniform(-1, 1), random.uniform(-1, 1)]
-            force = [current_vel[0] * random.uniform(
-                0.5, 1.5) or random_force[0], current_vel[1] * random.uniform(0.5, 1.5) or random_force[1]]
+            force = [
+                current_vel[0] * random.uniform(0.5, 1.5) or random_force[0],
+                current_vel[1] * random.uniform(0.5, 1.5) or random_force[1],
+            ]
 
-            if (force[0]**2 + force[1]**2) > 100:
+            if (force[0] ** 2 + force[1] ** 2) > 100:
                 force = [0.0, 0.0]
 
             self.entity_manager.apply_force(asteroid, force)

@@ -7,7 +7,7 @@ from pathlib import Path
 
 from ...app.gui.page import Page
 from ...game.entity import Player
-from ...game.levels.level import Level
+from ...game.levels.level import SpaceLevel
 
 
 class PrimaryView(Page):
@@ -27,7 +27,7 @@ class PrimaryView(Page):
         self._game_over = False
         self._restart = False
         self.player = Player()
-        self.level = Level(self)
+        self.level = SpaceLevel(self)
 
     def end_game(self):
         self._game_over = time.time()
@@ -49,7 +49,7 @@ class PrimaryView(Page):
     def game_draw(self):
         self.level.draw()
 
-    def draw(self):
+    def gui_draw(self):
         """Page method"""
         imgui.begin("Example: buttons")
         if imgui.button("Button 1"):
@@ -62,6 +62,9 @@ class PrimaryView(Page):
     def on_update(self, delta_time: float):
         self.level.update(delta_time)
         super().on_update(delta_time)
+
+    def on_hide_view(self):
+        return super().on_hide_view()
 
     def on_resize(self, width: int, height: int):
         self.level.resize(width, height)

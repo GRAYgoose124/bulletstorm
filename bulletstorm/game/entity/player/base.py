@@ -10,16 +10,6 @@ from bulletstorm.game.entity.player.settings import PlayerSettings
 class Player(Entity):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.sprite = None
-
-        self.hp = 100
-        self.last_hit = None
-
-        self.acceleration = [0, 0]
-        self.angular_acc = 0
-
-        self.is_firing = False
-
         self._settings = PlayerSettings()
 
     @property
@@ -34,40 +24,13 @@ class Player(Entity):
     def keybinds(self):
         return self._settings.keybinds
 
-    def reset(self):
-        self.hp = 100
-        self.last_hit = None
-
-        self.acceleration = [0, 0]
-        self.angular_acc = 0
-
-        self.is_firing = False
-
-    def update(self, delta_time):
-        body = self.manager.get_physics_object(self).body
-        if self.change_angle != 0:
-            self.angular_acc += self.change_angle / (1 + abs(self.angular_acc))
-            body.angular_velocity += self.angular_acc
-
-            if abs(body.angular_velocity) > self.gameplay_settings.MAX_TURN_VELOCITY:
-                body.angular_velocity = self.gameplay_settings.MAX_TURN_VELOCITY * (
-                    body.angular_velocity / abs(body.angular_velocity)
-                )
-
-        self.angular_acc *= 0.99
-        body.angular_velocity *= 0.99
-        self.manager.apply_impulse(self, self.acceleration)
-
-    def take_damage(self, damage=1, cooldown=1.0):
-        t = time.time()
-        if self.last_hit is None or t - self.last_hit > cooldown:
-            self.hp -= damage
-            self.last_hit = t
-
     def shoot(self):
         x, y = self.center_x, self.center_y
         projectile = Projectile(
-            center_x=self.center_x, center_y=self.center_y, angle=self.angle + 90
+            origin=self,
+            center_x=self.center_x,
+            center_y=self.center_y,
+            angle=self.angle + 90,
         )
         self.manager.add_entity(
             projectile,
@@ -82,6 +45,32 @@ class Player(Entity):
         # make projectile frictionless
         proj = self.manager.get_physics_object(projectile)
         proj.body.friction = 0
+
+    def shockline(self):
+        for a, b in self.manager.connected_entities:
+            if a == self:
+                b.take_damage(10)
+            elif b == self:
+                a.take_damage(10)
+
+    def update(self, delta_time):
+        body = self.manager.get_physics_object(self).body
+        if (
+            self.change_angle != 0
+            or body.angular_velocity != 0
+            or self.acceleration != [0, 0]
+        ):
+            self.angular_acc += self.change_angle / (1 + abs(self.angular_acc))
+            body.angular_velocity += self.angular_acc
+
+            if abs(body.angular_velocity) > self.gameplay_settings.MAX_TURN_VELOCITY:
+                body.angular_velocity = self.gameplay_settings.MAX_TURN_VELOCITY * (
+                    body.angular_velocity / abs(body.angular_velocity)
+                )
+
+        self.angular_acc *= 0.99
+        body.angular_velocity *= 0.99
+        self.manager.apply_impulse(self, self.acceleration)
 
     def collision_handler(self, sprite_a, sprite_b, arbiter, space, data):
         self.take_damage(10)
@@ -103,3 +92,5 @@ class Player(Entity):
         elif key == self.keybinds.SHOOT:
             # self.is_firing = not release
             self.shoot()
+        elif key == self.keybinds.SHOCKLINE:
+            self.shockline()

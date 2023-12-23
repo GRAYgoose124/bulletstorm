@@ -27,11 +27,28 @@ import imgui
 import imgui.core
 
 
+class Widget:
+    def __init__(self, gui):
+        self.gui = gui
+
+        self.button_message = ""
+
+    def draw(self):
+        with imgui.begin("Example: buttons"):
+            if imgui.button("Button 1"):
+                self.button_message = "You pressed 1!"
+            if imgui.button("Button 2"):
+                self.button_message = "You pressed 2!"
+            imgui.text(self.button_message)
+
+
 class Page(arcade.View):
     def __init__(self, window, name, title):
         super().__init__(window)
         self.name = name
         self.title = title
+        self.show_gui = True
+        self.widgets = [Widget(self)]
 
     def reset(self):
         pass
@@ -46,17 +63,18 @@ class Page(arcade.View):
         arcade.start_render()
         self.game_draw()
 
-        imgui.new_frame()
+        if self.show_gui:
+            imgui.new_frame()
 
-        self.draw_mainmenu()
-        self.draw_navbar()
+            self.draw_mainmenu()
+            self.draw_navbar()
 
-        imgui.set_next_window_position(288, 32, imgui.ONCE)
-        imgui.set_next_window_size(512, 512, imgui.ONCE)
+            imgui.set_next_window_position(288, 32, imgui.ONCE)
+            imgui.set_next_window_size(512, 512, imgui.ONCE)
 
-        self.draw()
+            self.gui_draw()
 
-        imgui.end_frame()
+            imgui.end_frame()
 
     def on_update(self, delta_time: float):
         return self.update(delta_time)
@@ -65,9 +83,18 @@ class Page(arcade.View):
         imgui.set_next_window_position(16, 32, imgui.ONCE)
         imgui.set_next_window_size(256, 732, imgui.ONCE)
 
-        imgui.begin("Examples")
-        imgui.text("Hello, world!")
-        imgui.end()
+        with imgui.begin("Examples"):
+            imgui.text("Hello, world!")
+
+    def on_show_view(self):
+        self.show_gui = True
+        return super().on_show_view()
+
+    def on_hide_view(self):
+        self.show_gui = False
+        imgui.new_frame()
+        imgui.end_frame()
+        return super().on_hide_view()
 
     def draw_mainmenu(self):
         if imgui.begin_main_menu_bar():
@@ -94,7 +121,7 @@ class Page(arcade.View):
     def game_draw(self):
         pass
 
-    def draw(self):
+    def gui_draw(self):
         pass
 
     def update(self, delta_time):

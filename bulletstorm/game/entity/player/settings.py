@@ -23,6 +23,7 @@ class PlayerKeybinds(dict):
     TURN_RIGHT: int = arcade.key.D
 
     SHOOT: int = arcade.key.SPACE
+    SHOCKLINE: int = arcade.key.V
 
     PAUSE_MENU: int = arcade.key.ESCAPE
 
