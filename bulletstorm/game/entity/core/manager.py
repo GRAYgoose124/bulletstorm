@@ -1,5 +1,6 @@
 import arcade
 import logging
+import networkx as nx
 
 from .base import Entity
 
@@ -15,7 +16,7 @@ class EntityManager(arcade.PymunkPhysicsEngine):
         self._entity_list = arcade.SpriteList()
         self._entity_tags = {}
 
-        self.connected_entities = set()
+        self.entity_graph = nx.Graph()
         self.explosions_list = arcade.SpriteList()
 
     @property
@@ -32,9 +33,13 @@ class EntityManager(arcade.PymunkPhysicsEngine):
         tag="entity",
         collision_type=None,
         collision_type_b=None,
-        self_collision=True,
+        collision_handler=None,
+        collide_with_own_type=True,
         **kwargs
     ):
+        if collision_handler is None:
+            collision_handler = entity.collision_handler
+
         if collision_type is not None:
             kwargs["collision_type"] = collision_type
 
@@ -42,14 +47,14 @@ class EntityManager(arcade.PymunkPhysicsEngine):
                 collision_type_b = collision_type
             else:
                 # also register the self collision handler TODO: it's own method
-                if self_collision:
+                if collide_with_own_type:
                     self.add_collision_handler(
-                        collision_type, collision_type, entity.collision_handler
+                        collision_type, collision_type, collision_handler
                     )
 
             # the other entity's collision handler  will be registered by it's own add_entity call
             self.add_collision_handler(
-                collision_type, collision_type_b, entity.collision_handler
+                collision_type, collision_type_b, collision_handler
             )
 
         self.add_sprite(entity, *args, **kwargs)
@@ -59,19 +64,18 @@ class EntityManager(arcade.PymunkPhysicsEngine):
         entity.manager = self
         entity.tag = tag
 
+    def remove_entity_from_graph(self, entity: Entity):
+        connected = list(self.entity_graph[entity])
+        while len(connected):
+            self.entity_graph.remove_edge(entity, connected.pop())
+
     def remove_entity(self, entity: Entity, *args, **kwargs):
         try:
             self.remove_sprite(entity, *args, **kwargs)
             self._entity_list.remove(entity)
             # remove connected entities
             # find set entries that contain entity
-            to_remove = set()
-            for a, b in self.connected_entities:
-                if a == entity or b == entity:
-                    to_remove.add((a, b))
-            for e in to_remove:
-                self.connected_entities.remove(e)
-
+            self.remove_entity_from_graph(entity)
         except KeyError:
             pass
 
@@ -91,28 +95,9 @@ class EntityManager(arcade.PymunkPhysicsEngine):
 
         super().step(delta_time)
 
-    def add_line_between(self, entity_a: Entity, entity_b: Entity):
-        pair = (entity_a, entity_b)
-        if pair not in self.connected_entities:
-            self.connected_entities.add(pair)
-
-    def has_line(self, entity: Entity):
-        for a, b in self.connected_entities:
-            if a == entity or b == entity:
-                return True
-        return False
-
-    def is_connected(self, entity_a: Entity, entity_b: Entity):
-        if any(
-            [
-                (a == entity_a and b == entity_b) or (a == entity_b and b == entity_a)
-                for a, b in self.connected_entities
-            ]
-        ):
-            return True
-
     def draw(self):
-        for entity_a, entity_b in self.connected_entities:
+        # TODO: spritelist sorta thing?
+        for entity_a, entity_b in self.entity_graph.edges:
             arcade.draw_line(
                 entity_a.center_x,
                 entity_a.center_y,
@@ -123,3 +108,16 @@ class EntityManager(arcade.PymunkPhysicsEngine):
             )
         self.entities.draw()
         self.explosions_list.draw()
+
+    # line stuff
+    def add_line_between(self, entity_a: Entity, entity_b: Entity):
+        self.entity_graph.add_edge(entity_a, entity_b)
+
+    def has_line(self, entity: Entity):
+        return entity in self.entity_graph
+
+    def is_adjacent(self, entity_a: Entity, entity_b: Entity):
+        return entity_a in self.entity_graph[entity_b]
+
+    def graph_distance_from(self, entity_a: Entity, entity_b: Entity):
+        return nx.shortest_path_length(self.entity_graph, entity_a, entity_b)

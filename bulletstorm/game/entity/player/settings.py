@@ -7,7 +7,7 @@ import arcade
 class PlayerConfig(dict):
     FORWARD_ACCELERATION: float = 4
     LATERAL_ACCELERATION: float = 1
-    TURN_VELOCITY: float = 0.33
+    TURN_VELOCITY: float = 0.05
     MAX_TURN_VELOCITY: float = 5.0
     DRAG: float = 0.9
 

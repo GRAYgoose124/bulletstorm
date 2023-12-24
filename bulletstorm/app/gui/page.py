@@ -92,14 +92,7 @@ class Page(arcade.View):
         return super().on_hide_view()
 
     def draw_sidebar(self):
-        pos = 16, 32
-        imgui.set_next_window_position(*pos, imgui.ONCE)
-        widget_size = self.percent_of(0.25, 1.0)
-        widget_size = widget_size[0] - 2 * pos[0], widget_size[1] - 2 * pos[1]
-        imgui.set_next_window_size(*widget_size, imgui.ONCE)
-
-        with imgui.begin("Examples"):
-            imgui.text("Hello, world!")
+        pass
 
     def draw_mainmenu(self):
         if imgui.begin_main_menu_bar():

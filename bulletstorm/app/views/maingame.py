@@ -50,6 +50,16 @@ class SpaceGameView(Page):
             self.level.setup(*self.window.get_size())
             self._restart = False
 
+    def draw_sidebar(self):
+        pos = 16, 32
+        imgui.set_next_window_position(*pos, imgui.ONCE)
+        widget_size = self.percent_of(0.25, 1.0)
+        widget_size = widget_size[0] - 2 * pos[0], widget_size[1] - 2 * pos[1]
+        imgui.set_next_window_size(*widget_size, imgui.ONCE)
+
+        with imgui.begin("Controls"):
+            imgui.text("V - shockline\nSPACE - fire\n\nESC - pause\n")
+
     def game_draw(self):
         player_center = (
             self.player.center_x - self.window.width / 2,
