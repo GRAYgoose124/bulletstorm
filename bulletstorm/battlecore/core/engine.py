@@ -129,11 +129,12 @@ class BattleEngine:
         """Perform the bot's action."""
         action = self._calculate_bot_action()
         target = self._calculate_bot_target(action)
-        print(f"\t{self.active_actor.name} targets {target.name} with {action.name}.")
 
         self._do_action(action, target)
         if end_turn:
             self._next_turn()
+
+        return "\t{self.active_actor.name} targets {target.name} with {action.name}.}"
 
     def _next_turn(self):
         self.active_actor = self.battle._next_turn()
