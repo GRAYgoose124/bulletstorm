@@ -9,7 +9,7 @@ from ...app.gui.page import Page
 from ...game.entity import Player
 from ...game.levels.level import SpaceLevel
 
-from ..gui.widgets.test import ButtonTestWidget
+from ..gui.widgets.test import ButtonTestWidget, BattleCoreWidget
 
 
 class PrimaryView(Page):
@@ -24,13 +24,15 @@ class PrimaryView(Page):
         self.button_message = ""
 
         self.add_widget(ButtonTestWidget)
+        self.add_widget(BattleCoreWidget)
+
         self.setup()
 
     def setup(self):
         self._game_over = False
         self._restart = False
-        self.player = Player()  # needs to last between levels
         self.level = SpaceLevel(self)
+        self.player = self.level.player
 
     def end_game(self):
         self._game_over = time.time()

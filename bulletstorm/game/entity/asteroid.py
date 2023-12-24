@@ -8,6 +8,8 @@ class Asteroid(Entity):
     def collision_handler(self, entity_a, entity_b, arbiter, space, data):
         # log.debug("collision between %s and %s", entity_a, entity_b)
         # damage player
+        if any([entity_a.tag == "player", entity_b.tag == "player"]):
+            print("collision between %s and %s" % (entity_a, entity_b))
         if entity_b.tag == "player":
             target = entity_b
         elif entity_a.tag == "player":
@@ -16,7 +18,7 @@ class Asteroid(Entity):
             target = None
 
         if target is not None:
-            target.take_damage(10, cooldown=0.25)
+            target.take_damage(1, cooldown=0.25)
 
         # if either entity has a line, connect a new one with manager - shockline op todo: upgrade for it
         if entity_a.tag == "asteroid" and entity_b.tag == "asteroid":

@@ -121,7 +121,11 @@ class SpaceLevel:
                 m = 3.3
 
             self.entity_manager.add_entity(
-                asteroid, tag="asteroid", collision_type="enemy", mass=m
+                asteroid,
+                tag="asteroid",
+                collision_type="enemy",
+                collision_type_b="player",
+                mass=m,
             )
             placed.append((rx, ry))
 
@@ -148,6 +152,8 @@ class SpaceLevel:
 
         # run the physics update
         self.entity_manager.step(delta_time)
+
+        # check if wrapped
 
         # check if player is dead
         if self.player.hp <= 0:
