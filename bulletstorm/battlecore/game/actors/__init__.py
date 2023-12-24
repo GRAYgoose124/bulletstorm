@@ -1,4 +1,4 @@
-from .heroes import __all__ as heroes
-from .enemies import __all__ as enemies
+from .heroes import *
+from .enemies import *
 
-__all__ = heroes + enemies
+__all__ = heroes.__all__ + enemies.__all__

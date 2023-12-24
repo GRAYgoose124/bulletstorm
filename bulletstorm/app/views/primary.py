@@ -56,14 +56,7 @@ class PrimaryView(Page):
 
     def gui_draw(self):
         """Page method"""
-
-        imgui.begin("Example: buttons")
-        if imgui.button("Button 1"):
-            self.button_message = "You pressed 1!"
-        if imgui.button("Button 2"):
-            self.button_message = "You pressed 2!"
-        imgui.text(self.button_message)
-        imgui.end()
+        pass
 
     def on_update(self, delta_time: float):
         self.level.update(delta_time)

@@ -77,6 +77,8 @@ class BattleEngine:
         for stat, value in action.cost:
             self.active_actor.statistics[stat] -= value
 
+        self._process_action_taken(action, target)
+
     def _process_action_taken(self, action, target):
         if action.category == "Attack":
             print(
@@ -102,7 +104,7 @@ class BattleEngine:
             elif menu_choice == "Run":
                 print("Run not implemented.")
 
-    def _perform_player_action(self):
+    def _perform_player_action(self, end_turn=False):
         possible_actions = self.active_actor.possible_actions
         action = input_selection("Select an action: ", possible_actions)
 
@@ -112,7 +114,8 @@ class BattleEngine:
         print(f"\t{self.active_actor.name} targets {target.name} with {action.name}.")
 
         self._do_action(action, target)
-        self._process_action_taken(action, target)
+        if end_turn:
+            self._next_turn()
 
     def _calculate_bot_action(self):
         """Calculate the bot's action."""
@@ -122,14 +125,19 @@ class BattleEngine:
         """Calculate the bot's target."""
         return self._get_possible_action_targets(action)[0]
 
-    def _perform_bot_action(self):
+    def _perform_bot_action(self, end_turn=False):
         """Perform the bot's action."""
         action = self._calculate_bot_action()
         target = self._calculate_bot_target(action)
         print(f"\t{self.active_actor.name} targets {target.name} with {action.name}.")
 
         self._do_action(action, target)
-        self._process_action_taken(action, target)
+        if end_turn:
+            self._next_turn()
+
+    def _next_turn(self):
+        self.active_actor = self.battle._next_turn()
+        self.active_turn_info = TurnInfo(self.active_actor)
 
     def start(self):
         print("Battle starting.")
@@ -138,8 +146,7 @@ class BattleEngine:
 
         while not self.battle.is_over:
             print(f"Turn {self.battle.turn}:")
-            self.active_actor = self.battle._next_turn()
-            self.active_turn_info = TurnInfo(self.active_actor)
+            self._next_turn()
 
             print(f"\t{self.active_actor.name} is active.")
 

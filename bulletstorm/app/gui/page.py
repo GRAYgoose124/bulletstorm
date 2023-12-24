@@ -55,7 +55,7 @@ class Page(arcade.View):
             imgui.new_frame()
 
             self.draw_mainmenu()
-            self.draw_navbar()
+            self.draw_sidebar()
 
             self._widget_draw()
             self.gui_draw()
@@ -64,13 +64,6 @@ class Page(arcade.View):
 
     def on_update(self, delta_time: float):
         return self.update(delta_time)
-
-    def draw_navbar(self):
-        imgui.set_next_window_position(16, 32, imgui.ONCE)
-        imgui.set_next_window_size(256, 732, imgui.ONCE)
-
-        with imgui.begin("Examples"):
-            imgui.text("Hello, world!")
 
     def on_show_view(self):
         self.show_gui = True
@@ -82,6 +75,16 @@ class Page(arcade.View):
         imgui.end_frame()
         return super().on_hide_view()
 
+    def draw_sidebar(self):
+        pos = 16, 32
+        imgui.set_next_window_position(*pos, imgui.ONCE)
+        widget_size = self.percent_of(0.25, 1.0)
+        widget_size = widget_size[0] - 2 * pos[0], widget_size[1] - 2 * pos[1]
+        imgui.set_next_window_size(*widget_size, imgui.ONCE)
+
+        with imgui.begin("Examples"):
+            imgui.text("Hello, world!")
+
     def draw_mainmenu(self):
         if imgui.begin_main_menu_bar():
             # File
@@ -91,7 +94,7 @@ class Page(arcade.View):
                 )
 
                 if clicked_quit:
-                    exit(1)
+                    arcade.close_window()
 
                 imgui.end_menu()
             # View
@@ -117,6 +120,7 @@ class Page(arcade.View):
     def update(self, delta_time):
         pass
 
+    # widget helpers
     def rel_to_mouse(self, x, y):
         pos = imgui.get_cursor_screen_pos()
         x1 = pos[0] + x
