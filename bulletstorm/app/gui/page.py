@@ -57,6 +57,7 @@ class Page(arcade.View):
             self.draw_mainmenu()
             self.draw_navbar()
 
+            self._widget_draw()
             self.gui_draw()
 
             imgui.end_frame()
@@ -109,11 +110,38 @@ class Page(arcade.View):
     def gui_draw(self):
         pass
 
+    def _widget_draw(self):
+        for widget in self.widgets:
+            widget.draw()
+
     def update(self, delta_time):
         pass
 
-    def rel(self, x, y):
+    def rel_to_mouse(self, x, y):
         pos = imgui.get_cursor_screen_pos()
         x1 = pos[0] + x
         y1 = pos[1] + y
         return x1, y1
+
+    def rel_to_window(self, x, y, widget_size=None):
+        """positives are from zero, negatives are from end of window"""
+
+        if x < 0:
+            if widget_size is not None:
+                x -= widget_size[0]
+            x = self.window.width + x
+        if y < 0:
+            if widget_size is not None:
+                y -= widget_size[1]
+            y = self.window.height + y
+
+        return x, y
+
+    def percent_of(self, x, y):
+        """Converts percentage of window to window coordinates
+
+        Args:
+            x (int): percentage of window width
+            y (int): percentage of window height
+        """
+        return self.window.width * x, self.window.height * y

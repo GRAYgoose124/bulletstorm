@@ -62,6 +62,8 @@ class Player(Entity):
             self.change_angle = 0 if release else -self.gameplay_settings.TURN_VELOCITY
         elif key == self.keybinds.SHOOT:
             # self.is_firing = not release
-            shoot(self, target_tag="enemy")
+            if not release:
+                shoot(self, target_tag="enemy")
         elif key == self.keybinds.SHOCKLINE:
-            shockline(self)
+            if not release:
+                shockline(self)

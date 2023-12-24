@@ -29,7 +29,7 @@ class PrimaryView(Page):
     def setup(self):
         self._game_over = False
         self._restart = False
-        self.player = Player()
+        self.player = Player()  # needs to last between levels
         self.level = SpaceLevel(self)
 
     def end_game(self):
@@ -54,6 +54,7 @@ class PrimaryView(Page):
 
     def gui_draw(self):
         """Page method"""
+
         imgui.begin("Example: buttons")
         if imgui.button("Button 1"):
             self.button_message = "You pressed 1!"
