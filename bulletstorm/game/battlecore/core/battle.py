@@ -27,6 +27,7 @@ class Battle:
         )
 
     def initialize(self):
+        """Initialize the battle."""
         self.turn = 0
         self._initialize_turn_meter()
         self._reset_temp_stats()

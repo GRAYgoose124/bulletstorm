@@ -17,6 +17,7 @@ class SpaceLevel:
 
         self.size = None
         self.resize(*parent.window.get_size())
+        self.setup()
 
     def setup(self):
         self.entity_manager = EntityManager()
@@ -26,8 +27,7 @@ class SpaceLevel:
 
     def resize(self, width, height):
         self.size = (width, height)
-
-        self.setup()
+        # self.setup()
 
     @property
     def player(self):

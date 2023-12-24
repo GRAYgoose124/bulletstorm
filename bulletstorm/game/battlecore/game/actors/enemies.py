@@ -6,7 +6,7 @@ class Enemy(Actor):
     pass
 
 
-skeleton_enemy = Enemy(
+skeleton_enemy = lambda: Enemy(
     "Skeleton",
     actions=[
         slash_attack,

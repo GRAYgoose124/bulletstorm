@@ -60,7 +60,7 @@ class BattleEngine:
             targets.extend(self.active_actor.party.actors)
         if action.can_target_enemies:
             for party in self.battle.parties.values():
-                if self.active_actor.party != party:
+                if self.active_actor.party is not party:
                     targets.extend(party.actors)
         return targets
 
@@ -134,7 +134,7 @@ class BattleEngine:
         if end_turn:
             self._next_turn()
 
-        return "\t{self.active_actor.name} targets {target.name} with {action.name}.}"
+        return f"{self.active_actor.name} targets {target.name} with {action.name}."
 
     def _next_turn(self):
         self.active_actor = self.battle._next_turn()

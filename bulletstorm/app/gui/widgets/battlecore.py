@@ -6,24 +6,41 @@ from ....game.battlecore.core import *
 from ....game.battlecore.game.actors import *
 
 
+def make_player_party():
+    player_party = Party("Player")
+    player_party.add_actor(mitochondra_hero())
+    return player_party
+
+
+def make_enemy_party():
+    enemy_party = Party("Enemy")
+    enemy_party.add_actor(skeleton_enemy())
+    return enemy_party
+
+
+def init_battle():
+    player_party = make_player_party()
+    enemy_party = make_enemy_party()
+
+    B = Battle()
+    B.add_party(player_party)
+    B.add_party(enemy_party)
+
+    B.initialize()
+    return B
+
+
 class BattleCoreWidget(Widget):
     def __init__(self, page):
         super().__init__(page)
 
-        self.battle_message = ""
+        self.last_output = ""
         self.battle_engine = BattleEngine()
 
-        player_party = Party("Player")
-        player_party.add_actor(mitochondra_hero)
+        self._start_battle(init_battle())
 
-        enemy_party = Party("Enemy")
-        enemy_party.add_actor(skeleton_enemy)
-
-        B = Battle()
-        B.add_party(player_party)
-        B.add_party(enemy_party)
-        self.battle_engine.set_battle(B)
-        self.battle_engine.battle.initialize()
+    def _start_battle(self, battle):
+        self.battle_engine.battle = battle
         self.battle_engine._next_turn()
 
     def _battle_turn_ui(self):
@@ -46,13 +63,10 @@ class BattleCoreWidget(Widget):
                                 if imgui.button(t.name):
                                     target = t
                         self.battle_engine._do_action(action, target)
-                        self.battle_engine._next_turn()
                         output = f"{self.battle_engine.active_actor.name} used {action.name} on {target.name}"
-                if imgui.button("End Turn"):
-                    self.battle_engine._next_turn()
         else:
             if imgui.button("Next"):
-                output = self.battle_engine._perform_bot_action(end_turn=True)
+                output = self.battle_engine._perform_bot_action()
         return output
 
     def draw(self):
@@ -62,16 +76,20 @@ class BattleCoreWidget(Widget):
             *self.page.rel_to_window(512, 512, widget_size=widget_size), imgui.ONCE
         )
 
-        last_output = ""
         with imgui.begin("Battle UI"):
             if not self.battle_engine.battle.is_over:
-                imgui.text(last_output)
+                imgui.text(self.last_output)
                 last_output = self._battle_turn_ui()
+                if last_output:
+                    self.last_output = last_output
+                    self.battle_engine._next_turn()
+                elif imgui.button("End Turn"):
+                    self.battle_engine._next_turn()
             else:
                 imgui.text("Battle over!")
                 # imgui.text(f"Winner: {self.battle_engine.battle.winner.name}")
                 if imgui.button("Restart"):
                     # does not work because hp is not saved between battles atm.
-                    self.battle_engine.battle.initialize()
-                    self.battle_engine._next_turn()
+                    self._start_battle(init_battle())
+
         # imgui.text(f"\n{self.battle_engine.battle _stats.pretty_stats()}")

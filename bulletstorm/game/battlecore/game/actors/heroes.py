@@ -6,7 +6,7 @@ class Hero(Actor):
     pass
 
 
-mitochondra_hero = Hero(
+mitochondra_hero = lambda: Hero(
     "Mitochondra",
     actions=[
         slash_attack,
