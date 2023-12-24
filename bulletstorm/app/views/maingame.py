@@ -13,7 +13,7 @@ from ..gui.widgets.spacebattle import ShipUiWidget
 from ..gui.widgets.battlecore import BattleCoreWidget
 
 
-class PrimaryView(Page):
+class SpaceGameView(Page):
     def __init__(self, window, name="primary", title="Primary"):
         super().__init__(window, name, title)
         self._game_over = False
@@ -39,8 +39,9 @@ class PrimaryView(Page):
     def restart_game(self):
         self.end_game()
         self._restart = True
-
         self.setup()
+
+        self.window.show_view("primary")
 
     def on_show(self):
         arcade.set_background_color(arcade.color.BLACK)
@@ -60,6 +61,9 @@ class PrimaryView(Page):
     def gui_draw(self):
         """Page method"""
         pass
+
+    def on_quit(self):
+        self.window.close()
 
     def on_update(self, delta_time: float):
         self.level.update(delta_time)

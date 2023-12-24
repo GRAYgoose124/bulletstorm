@@ -1,6 +1,6 @@
-from .maingame import PrimaryView
+from .maingame import SpaceGameView
 from .pause import PauseView
 from .gameover import GameOverView
 
 
-__all__ = ["PrimaryView", "PauseView", "GameOverView"]
+__all__ = ["SpaceGameView", "PauseView", "GameOverView"]

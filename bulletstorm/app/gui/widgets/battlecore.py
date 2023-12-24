@@ -3,7 +3,7 @@ from .core import Widget
 
 
 from ....game.battlecore.core import *
-from ....game.battlecore.game.actors import *
+from ....game.battlecore.battlegame.actors import *
 
 
 def make_player_party():

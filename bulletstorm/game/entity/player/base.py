@@ -12,8 +12,8 @@ from ..actions.attacks import shoot, shockline
 class Player(Entity):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.hp = 50
         self._settings = PlayerSettings()
+        self.hp = self.gameplay_settings.MAX_HP
 
     @property
     def settings(self):
@@ -69,3 +69,11 @@ class Player(Entity):
         elif key == self.keybinds.SHOCKLINE:
             if not release:
                 shockline(self)
+
+    def reset(self):
+        self.angle = 0
+        self.acceleration = [0, 0]
+        self.change_angle = 0
+        self.angular_acc = 0
+        self.hp = self._settings.max_hp
+        self.is_firing = False

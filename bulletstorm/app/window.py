@@ -23,11 +23,10 @@ class BulletStorm(arcade.Window):
         self.renderer = ArcadeRenderer(self)
         self.view_metrics = False
 
-        self.pages = {
-            "primary": PrimaryView(self),
-            "pause": PauseView(),
-            "game_over": GameOverView(),
-        }
+        self.pages = {}
+        self.pages["primary"] = SpaceGameView(self)
+        self.pages["pause"] = PauseView()
+        self.pages["game_over"] = GameOverView(self)
 
         self._last_view = None
 
@@ -57,4 +56,10 @@ class BulletStorm(arcade.Window):
     def on_draw(self):
         super().on_draw()
         imgui.render()
+
+        # check if window was closed
+        if self._current_view is None:
+            self.close()
+            return
+
         self.renderer.render(imgui.get_draw_data())

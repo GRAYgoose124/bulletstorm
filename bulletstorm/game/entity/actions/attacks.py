@@ -29,13 +29,13 @@ def shoot(entity, target_tag="enemy"):
     )
 
 
-def shockline(entity):
+def shockline(player):
     """Shocks targets connected to the entity."""
-    for a, b in entity.manager.connected_entities:
+    for a, b in player.manager.connected_entities:
         target = None
-        if a == entity:
+        if a == player:
             target = b
-        elif b == entity:
+        elif b == player:
             target = a
 
         if target is None:
@@ -43,10 +43,16 @@ def shockline(entity):
 
         # if we kill the enemy, heal
         dmg = random.randint(3, 10)
+
+        # check against old hp just in case something else killed it - prob mitigates most cases
+        old_hp = target.hp
         target.take_damage(dmg)
-        if target.hp <= 0:
-            entity.hp += 1
+        if target.hp <= 0 and old_hp > 0:
+            player.hp += 1
             dmg *= 2
 
         # spawn explosion at target
-        make_explosion(target, count=dmg * 5)
+        d = player.manager.parent.window.width / 2
+        onscreen = target.position - player.position < (d, d)
+        if onscreen:
+            make_explosion(target, count=dmg * 5)

@@ -12,11 +12,7 @@ class PauseView(arcade.View):
         self._settings_menu = self.__build_settings_menu()
         self._exit_dialog_handle = None
 
-        self.uimanager.add(
-            arcade.gui.UIAnchorWidget(
-                child=self._pause_screen, anchor_x="center", anchor_y="center"
-            )
-        )
+        self.uimanager.add(self._pause_screen)
 
     def on_show(self):
         arcade.set_background_color(arcade.color.AMAZON)
@@ -98,7 +94,9 @@ class PauseView(arcade.View):
             )
         )
 
-        return pause_screen
+        return arcade.gui.UIAnchorWidget(
+            child=pause_screen, anchor_x="center", anchor_y="center"
+        )
 
     def __build_settings_menu(self):
         menu = arcade.gui.UIBoxLayout()

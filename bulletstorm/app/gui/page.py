@@ -42,6 +42,8 @@ class Page(arcade.View):
             self.window.width, self.window.height, self.window
         )
 
+        self.clicked_quit = False
+
     def reset(self):
         pass
 
@@ -72,7 +74,12 @@ class Page(arcade.View):
             imgui.end_frame()
 
     def on_update(self, delta_time: float):
+        if self.clicked_quit:
+            self.on_quit()
         return self.update(delta_time)
+
+    def on_quit(self):
+        pass
 
     def on_show_view(self):
         self.show_gui = True
@@ -98,14 +105,11 @@ class Page(arcade.View):
         if imgui.begin_main_menu_bar():
             # File
             if imgui.begin_menu("File", True):
-                clicked_quit, selected_quit = imgui.menu_item(
+                self.clicked_quit, selected_quit = imgui.menu_item(
                     "Quit", "Cmd+Q", False, True
                 )
-
-                if clicked_quit:
-                    arcade.close_window()
-
                 imgui.end_menu()
+
             # View
             if imgui.begin_menu("View", True):
                 clicked_metrics, self.window.view_metrics = imgui.menu_item(

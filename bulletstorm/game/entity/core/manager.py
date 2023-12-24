@@ -4,13 +4,14 @@ import logging
 from .base import Entity
 
 
-class EntityAlreadyRemovedError(Exception):
+class EntityAlreadyRemovedError(KeyError):
     pass
 
 
 class EntityManager(arcade.PymunkPhysicsEngine):
-    def __init__(self) -> None:
+    def __init__(self, parent) -> None:
         super().__init__()
+        self.parent = parent
         self._entity_list = arcade.SpriteList()
         self._entity_tags = {}
 

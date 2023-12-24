@@ -14,6 +14,8 @@ class PlayerConfig(dict):
     SHOOT_COOLDOWN: float = 0.01
     PROJECTILE_SPEED: float = 500
 
+    MAX_HP: int = 30
+
 
 @dataclass
 class PlayerKeybinds(dict):

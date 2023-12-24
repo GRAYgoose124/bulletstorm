@@ -13,14 +13,14 @@ class SpaceLevel:
         self.parent = parent
 
         self._player = parent.player
-        self.entity_manager = None
+        self.manager = None
 
         self.size = None
         self.resize(*parent.window.get_size())
         self.setup()
 
     def setup(self):
-        self.entity_manager = EntityManager()
+        self.manager = EntityManager(self.parent)
 
         self.__spawn_player()
         self.__generate_asteroids()
@@ -59,7 +59,7 @@ class SpaceLevel:
             self.player.center_x = position[0]
             self.player.center_y = position[1]
 
-        self.entity_manager.add_entity(
+        self.manager.add_entity(
             self.player,
             mass=mass,
             tag="player",
@@ -121,7 +121,7 @@ class SpaceLevel:
                 m = 3.3
             asteroid.hp = m * 5
 
-            self.entity_manager.add_entity(
+            self.manager.add_entity(
                 asteroid,
                 tag="asteroid",
                 collision_type="enemy",
@@ -132,11 +132,9 @@ class SpaceLevel:
 
     def update(self, delta_time: float):
         # move all the asteroids
-        for asteroid in self.entity_manager.by_tag("asteroid"):
+        for asteroid in self.manager.by_tag("asteroid"):
             try:
-                current_vel = self.entity_manager.get_physics_object(
-                    asteroid
-                ).body.velocity
+                current_vel = self.manager.get_physics_object(asteroid).body.velocity
             except EntityAlreadyRemovedError:
                 continue
 
@@ -149,10 +147,10 @@ class SpaceLevel:
             if (force[0] ** 2 + force[1] ** 2) > 100:
                 force = [0.0, 0.0]
 
-            self.entity_manager.apply_force(asteroid, force)
+            self.manager.apply_force(asteroid, force)
 
         # run the physics update
-        self.entity_manager.step(delta_time)
+        self.manager.step(delta_time)
 
         # check if wrapped
 
@@ -161,4 +159,4 @@ class SpaceLevel:
             self.parent.end_game()
 
     def draw(self):
-        self.entity_manager.draw()
+        self.manager.draw()
