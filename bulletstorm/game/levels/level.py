@@ -119,6 +119,7 @@ class SpaceLevel:
                 m = 1.5
             elif "big" in asset:
                 m = 3.3
+            asteroid.hp = m * 5
 
             self.entity_manager.add_entity(
                 asteroid,

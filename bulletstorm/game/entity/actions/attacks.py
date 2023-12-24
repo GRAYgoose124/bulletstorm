@@ -1,3 +1,4 @@
+import random
 import arcade
 from ..projectile import Projectile
 
@@ -41,10 +42,11 @@ def shockline(entity):
             continue
 
         # if we kill the enemy, heal
-        target.take_damage(3)
+        dmg = random.randint(3, 10)
+        target.take_damage(dmg)
         if target.hp <= 0:
             entity.hp += 1
-            make_explosion(target)
+            dmg *= 2
 
         # spawn explosion at target
-        make_explosion(target)
+        make_explosion(target, count=dmg * 5)

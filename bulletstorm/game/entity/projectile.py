@@ -1,6 +1,7 @@
 from .core.base import Entity
 
 
+# TODO: should be a particle, follow explosion's lead.
 class Projectile(Entity):
     def __init__(self, origin, *args, **kwargs):
         self.origin = origin

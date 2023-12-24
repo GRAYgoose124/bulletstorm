@@ -140,8 +140,8 @@ class Particle(arcade.SpriteCircle):
                 self.my_list.append(smoke)
 
 
-def make_explosion(target):
-    for i in range(PARTICLE_COUNT):
+def make_explosion(target, count=PARTICLE_COUNT):
+    for i in range(count):
         particle = Particle(target.manager.explosions_list)
         particle.position = target.position
         target.manager.explosions_list.append(particle)
