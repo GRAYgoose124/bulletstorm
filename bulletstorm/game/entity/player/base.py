@@ -4,6 +4,7 @@ import arcade
 
 from ...entity import Entity
 from ...entity.projectile import Projectile
+
 from .settings import PlayerSettings
 from ..actions.attacks import shoot, shockline
 
@@ -11,6 +12,7 @@ from ..actions.attacks import shoot, shockline
 class Player(Entity):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.hp = 50
         self._settings = PlayerSettings()
 
     @property

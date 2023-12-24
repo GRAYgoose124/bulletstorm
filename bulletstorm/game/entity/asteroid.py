@@ -18,7 +18,7 @@ class Asteroid(Entity):
             target = None
 
         if target is not None:
-            target.take_damage(1, cooldown=0.25)
+            target.take_damage(1, cooldown=0)
 
         # if either entity has a line, connect a new one with manager - shockline op todo: upgrade for it
         if entity_a.tag == "asteroid" and entity_b.tag == "asteroid":

@@ -35,6 +35,13 @@ class Page(arcade.View):
         self.show_gui = True
         self.widgets = []
 
+        self.camera_sprites = arcade.Camera(
+            self.window.width, self.window.height, self.window
+        )
+        self.camera_gui = arcade.Camera(
+            self.window.width, self.window.height, self.window
+        )
+
     def reset(self):
         pass
 
@@ -49,8 +56,10 @@ class Page(arcade.View):
 
     def on_draw(self):
         arcade.start_render()
+        self.camera_sprites.use()
         self.game_draw()
 
+        self.camera_gui.use()
         if self.show_gui:
             imgui.new_frame()
 

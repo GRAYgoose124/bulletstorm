@@ -52,6 +52,11 @@ class PrimaryView(Page):
             self._restart = False
 
     def game_draw(self):
+        player_center = (
+            self.player.center_x - self.window.width / 2,
+            self.player.center_y - self.window.height / 2,
+        )
+        self.camera_sprites.move_to(player_center, 1.0)
         self.level.draw()
 
     def gui_draw(self):
@@ -67,6 +72,8 @@ class PrimaryView(Page):
 
     def on_resize(self, width: int, height: int):
         self.level.resize(width, height)
+        self.camera_sprites.resize(int(width), int(height))
+        self.camera_gui.resize(int(width), int(height))
         super().on_resize(width, height)
 
     def on_key_press(self, key, modifiers):
