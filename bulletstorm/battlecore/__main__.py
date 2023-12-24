@@ -4,7 +4,8 @@ from .core import *
 from .game.actors.heroes import *
 from .game.actors.enemies import *
 
-if __name__ == "__main__":
+
+def main():
     logging.basicConfig(level=logging.DEBUG, format="%(message)s")
 
     player_party = Party("Player")
@@ -18,3 +19,7 @@ if __name__ == "__main__":
     B.add_party(enemy_party)
     BE = BattleEngine(B)
     BE.start()
+
+
+if __name__ == "__main__":
+    main()

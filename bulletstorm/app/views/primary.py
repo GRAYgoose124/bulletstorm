@@ -9,6 +9,8 @@ from ...app.gui.page import Page
 from ...game.entity import Player
 from ...game.levels.level import SpaceLevel
 
+from ..gui.widgets.test import ButtonTestWidget
+
 
 class PrimaryView(Page):
     def __init__(self, window, name="primary", title="Primary"):
@@ -21,6 +23,7 @@ class PrimaryView(Page):
 
         self.button_message = ""
 
+        self.add_widget(ButtonTestWidget)
         self.setup()
 
     def setup(self):

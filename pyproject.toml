@@ -16,3 +16,4 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 bstorm = "bulletstorm.app.__main__:main"
+bcore = "bulletstorm.battlecore.__main__:main"

@@ -2,9 +2,10 @@ from dataclasses import dataclass
 import time
 import arcade
 
-from bulletstorm.game.entity import Entity
-from bulletstorm.game.entity.projectile import Projectile
-from bulletstorm.game.entity.player.settings import PlayerSettings
+from ...entity import Entity
+from ...entity.projectile import Projectile
+from .settings import PlayerSettings
+from ..actions.attacks import shoot, shockline
 
 
 class Player(Entity):
@@ -23,44 +24,6 @@ class Player(Entity):
     @property
     def keybinds(self):
         return self._settings.keybinds
-
-    def shoot(self):
-        x, y = self.center_x, self.center_y
-        projectile = Projectile(
-            origin=self,
-            center_x=self.center_x,
-            center_y=self.center_y,
-            angle=self.angle + 90,
-        )
-        self.manager.add_entity(
-            projectile,
-            collision_type="projectile",
-            collision_type_b="enemy",
-            tag="projectile",
-        )
-        self.manager.apply_impulse(
-            projectile, [self.gameplay_settings.PROJECTILE_SPEED, 0]
-        )
-
-        # make projectile frictionless
-        proj = self.manager.get_physics_object(projectile)
-        proj.body.friction = 0
-
-    def shockline(self):
-        for a, b in self.manager.connected_entities:
-            target = None
-            if a == self:
-                target = b
-            elif b == self:
-                target = a
-
-            if target is None:
-                continue
-
-            # if we kill the enemy, heal
-            target.take_damage(3)
-            if target.hp <= 0:
-                self.hp += 1
 
     def update(self, delta_time):
         body = self.manager.get_physics_object(self).body
@@ -99,6 +62,6 @@ class Player(Entity):
             self.change_angle = 0 if release else -self.gameplay_settings.TURN_VELOCITY
         elif key == self.keybinds.SHOOT:
             # self.is_firing = not release
-            self.shoot()
+            shoot(self, target_tag="enemy")
         elif key == self.keybinds.SHOCKLINE:
-            self.shockline()
+            shockline(self)

@@ -27,33 +27,19 @@ import imgui
 import imgui.core
 
 
-class Widget:
-    def __init__(self, gui):
-        self.gui = gui
-
-        self.button_message = ""
-
-    def draw(self):
-        imgui.set_next_window_position(self.gui.rel(-32, -32), imgui.ONCE)
-        imgui.set_next_window_size(*self.gui.percent_of(0.25, 0.25), imgui.ONCE)
-        with imgui.begin("Example: buttons"):
-            if imgui.button("Button 1"):
-                self.button_message = "You pressed 1!"
-            if imgui.button("Button 2"):
-                self.button_message = "You pressed 2!"
-            imgui.text(self.button_message)
-
-
 class Page(arcade.View):
     def __init__(self, window, name, title):
         super().__init__(window)
         self.name = name
         self.title = title
         self.show_gui = True
-        self.widgets = [Widget(self)]
+        self.widgets = []
 
     def reset(self):
         pass
+
+    def add_widget(self, widget_cls):
+        self.widgets.append(widget_cls(self))
 
     @classmethod
     def create(self, app, name, title):
