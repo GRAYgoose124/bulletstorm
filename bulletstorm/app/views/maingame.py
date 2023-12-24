@@ -11,8 +11,6 @@ from ...game.levels.level import SpaceLevel
 
 from ..gui.widgets.spacebattle import ShipUiWidget, BattleCoreWidget
 
-from ...game.entity.explosion import Particle
-
 
 class PrimaryView(Page):
     def __init__(self, window, name="primary", title="Primary"):

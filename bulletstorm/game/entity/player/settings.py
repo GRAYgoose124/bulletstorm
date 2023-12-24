@@ -11,7 +11,7 @@ class PlayerConfig(dict):
     MAX_TURN_VELOCITY: float = 5.0
     DRAG: float = 0.9
 
-    SHOOT_COOLDOWN: float = 0.5
+    SHOOT_COOLDOWN: float = 0.01
     PROJECTILE_SPEED: float = 500
 
 

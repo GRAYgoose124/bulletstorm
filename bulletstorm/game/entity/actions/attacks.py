@@ -1,7 +1,7 @@
 import arcade
 from ..projectile import Projectile
 
-from ..explosion import make_explosion
+from ..particles.explosion import make_explosion
 
 
 def shoot(entity, target_tag="enemy"):
@@ -18,14 +18,14 @@ def shoot(entity, target_tag="enemy"):
         collision_type="projectile",
         collision_type_b=target_tag,
         tag="projectile",
+        self_collision=False,
     )
+    proj = entity.manager.get_physics_object(projectile)
+    proj.body.friction = 0
+
     entity.manager.apply_impulse(
         projectile, [entity.gameplay_settings.PROJECTILE_SPEED, 0]
     )
-
-    # make projectile frictionless
-    proj = entity.manager.get_physics_object(projectile)
-    proj.body.friction = 0
 
 
 def shockline(entity):

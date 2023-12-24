@@ -31,6 +31,7 @@ class EntityManager(arcade.PymunkPhysicsEngine):
         tag="entity",
         collision_type=None,
         collision_type_b=None,
+        self_collision=True,
         **kwargs
     ):
         if collision_type is not None:
@@ -40,9 +41,10 @@ class EntityManager(arcade.PymunkPhysicsEngine):
                 collision_type_b = collision_type
             else:
                 # also register the self collision handler TODO: it's own method
-                self.add_collision_handler(
-                    collision_type, collision_type, entity.collision_handler
-                )
+                if self_collision:
+                    self.add_collision_handler(
+                        collision_type, collision_type, entity.collision_handler
+                    )
 
             # the other entity's collision handler  will be registered by it's own add_entity call
             self.add_collision_handler(
