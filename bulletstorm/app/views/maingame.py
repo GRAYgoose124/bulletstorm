@@ -5,11 +5,13 @@ import imgui
 import random
 from pathlib import Path
 
-from ...app.gui.page import Page
+from ..gui.page import Page
 from ...game.entity import Player
 from ...game.levels.level import SpaceLevel
 
-from ..gui.widgets.test import ButtonTestWidget, BattleCoreWidget
+from ..gui.widgets.spacebattle import ShipUiWidget, BattleCoreWidget
+
+from ...game.entity.explosion import Particle
 
 
 class PrimaryView(Page):
@@ -21,11 +23,8 @@ class PrimaryView(Page):
         self.player = None
         self.level = None
 
-        self.button_message = ""
-
-        self.add_widget(ButtonTestWidget)
+        self.add_widget(ShipUiWidget)
         self.add_widget(BattleCoreWidget)
-
         self.setup()
 
     def setup(self):

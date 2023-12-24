@@ -42,8 +42,8 @@ class Player(Entity):
                     body.angular_velocity / abs(body.angular_velocity)
                 )
 
-        self.angular_acc *= 0.99
-        body.angular_velocity *= 0.99
+        self.angular_acc *= self.gameplay_settings.DRAG
+        body.angular_velocity *= self.gameplay_settings.DRAG
         self.manager.apply_impulse(self, self.acceleration)
 
     def collision_handler(self, sprite_a, sprite_b, arbiter, space, data):

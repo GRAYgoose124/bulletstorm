@@ -15,6 +15,7 @@ class EntityManager(arcade.PymunkPhysicsEngine):
         self._entity_tags = {}
 
         self.connected_entities = set()
+        self.explosions_list = arcade.SpriteList()
 
     @property
     def entities(self):
@@ -83,6 +84,8 @@ class EntityManager(arcade.PymunkPhysicsEngine):
                 self.remove_entity(entity)
             entity.update(delta_time)
 
+        self.explosions_list.update()
+
         super().step(delta_time)
 
     def add_line_between(self, entity_a: Entity, entity_b: Entity):
@@ -116,3 +119,4 @@ class EntityManager(arcade.PymunkPhysicsEngine):
                 2,
             )
         self.entities.draw()
+        self.explosions_list.draw()

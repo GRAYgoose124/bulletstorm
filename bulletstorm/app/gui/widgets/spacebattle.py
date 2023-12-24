@@ -4,7 +4,7 @@ import imgui.core
 from .core import Widget
 
 
-class ButtonTestWidget(Widget):
+class ShipUiWidget(Widget):
     def __init__(self, page):
         super().__init__(page)
 
@@ -17,11 +17,11 @@ class ButtonTestWidget(Widget):
             *self.page.rel_to_window(-32, -32, widget_size=widget_size), imgui.ONCE
         )
 
-        with imgui.begin("Widget: Button Test"):
-            if imgui.button("Button 1"):
-                self.button_message = "You pressed 1!"
-            if imgui.button("Button 2"):
-                self.button_message = "You pressed 2!"
+        with imgui.begin("Ship UI"):
+            if imgui.button("Fire Missile"):
+                self.button_message = "You fired a missile!"
+            if imgui.button("Speak to Ship AI"):
+                self.button_message = "Biya! Biya!"
             imgui.text(self.button_message)
             imgui.text(f"Health: {self.page.player.hp}")
 

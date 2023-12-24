@@ -5,14 +5,14 @@ import arcade
 
 @dataclass
 class PlayerConfig(dict):
-    FORWARD_ACCELERATION: float = 1
+    FORWARD_ACCELERATION: float = 4
     LATERAL_ACCELERATION: float = 1
-    TURN_VELOCITY: float = 0.001
-    MAX_TURN_VELOCITY: float = 10.0
-    DRAG: float = 0.99
+    TURN_VELOCITY: float = 0.33
+    MAX_TURN_VELOCITY: float = 5.0
+    DRAG: float = 0.9
 
     SHOOT_COOLDOWN: float = 0.5
-    PROJECTILE_SPEED: float = 200
+    PROJECTILE_SPEED: float = 500
 
 
 @dataclass

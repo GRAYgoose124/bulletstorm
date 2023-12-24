@@ -1,4 +1,7 @@
+import arcade
 from ..projectile import Projectile
+
+from ..explosion import make_explosion
 
 
 def shoot(entity, target_tag="enemy"):
@@ -41,3 +44,7 @@ def shockline(entity):
         target.take_damage(3)
         if target.hp <= 0:
             entity.hp += 1
+            make_explosion(target)
+
+        # spawn explosion at target
+        make_explosion(target)

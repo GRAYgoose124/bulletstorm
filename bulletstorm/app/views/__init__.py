@@ -1,4 +1,4 @@
-from .primary import PrimaryView
+from .maingame import PrimaryView
 from .pause import PauseView
 from .gameover import GameOverView
 
