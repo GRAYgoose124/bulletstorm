@@ -1,4 +1,4 @@
-from .maingame import SpaceGameView
+from .maingame.view import SpaceGameView
 from .pause import PauseView
 from .gameover import GameOverView
 

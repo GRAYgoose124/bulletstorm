@@ -4,10 +4,10 @@ from pathlib import Path
 
 from pymunk import Vec2d
 
-from bulletstorm.game.entity import EntityManager, Player
-from bulletstorm.game.entity.core.manager import EntityAlreadyRemovedError
+from ..entity import EntityManager, Player
+from ..entity.core.manager import EntityAlreadyRemovedError
 
-from bulletstorm.game.entity.asteroid import Asteroid
+from ..entity.asteroid import Asteroid
 
 
 class SpaceLevel:
@@ -44,10 +44,7 @@ class SpaceLevel:
         # ship sheet has two sprites side by side
         # TODO move into player class and preserve game player
         root = (
-            Path(__file__).parent.parent.parent.parent
-            / "assets"
-            / "topdown-scifi"
-            / "asteroid-fighter"
+            Path(__file__).parents[4] / "assets" / "topdown-scifi" / "asteroid-fighter"
         )
         self.player = Player(
             root / "ship.png", image_x=0, image_y=0, image_width=48, image_height=48

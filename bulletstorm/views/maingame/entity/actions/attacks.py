@@ -60,12 +60,19 @@ def shockline(player):
     if player not in player.manager.entity_graph:
         return
 
+    me = lambda t: make_explosion(
+        t,
+        count=dmg * 50,
+        screen_origin=(
+            -player.manager.parent.camera_sprites.position[0],  # x
+            -player.manager.parent.camera_sprites.position[1],  # y
+        ),
+    )
+
     for a, b in nx.dfs_edges(player.manager.entity_graph, source=player, depth_limit=5):
         if a != player:
             dmg = _shockline(player, a, player.manager.graph_distance_from(player, a))
-            target = a
+            me(a)
         if b != player:
             dmg = _shockline(player, b, player.manager.graph_distance_from(player, b))
-            target = b
-
-        make_explosion(target, count=dmg * 50)
+            me(b)

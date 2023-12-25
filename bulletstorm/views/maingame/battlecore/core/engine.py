@@ -119,7 +119,8 @@ class BattleEngine:
 
     def _calculate_bot_action(self):
         """Calculate the bot's action."""
-        return self.active_actor.possible_actions[0]
+        if self.active_actor.possible_actions:
+            return self.active_actor.possible_actions[0]
 
     def _calculate_bot_target(self, action):
         """Calculate the bot's target."""
@@ -128,6 +129,8 @@ class BattleEngine:
     def _perform_bot_action(self, end_turn=False):
         """Perform the bot's action."""
         action = self._calculate_bot_action()
+        if not action:
+            return
         target = self._calculate_bot_target(action)
 
         self._do_action(action, target)

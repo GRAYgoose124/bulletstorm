@@ -27,7 +27,7 @@ import imgui
 import imgui.core
 
 
-class Page(arcade.View):
+class GuiView(arcade.View):
     def __init__(self, window, name, title):
         super().__init__(window)
         self.name = name

@@ -2,7 +2,7 @@ import arcade
 import arcade.gui
 import logging
 
-from ..gui.page import Page
+from ..gui.guiview import GuiView
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ def reset_player(window):
     window.show_view("primary")
 
 
-class GameOverView(Page):
+class GameOverView(GuiView):
     def __init__(self, window):
         super().__init__(window, "gameover", "Game Over")
 

@@ -112,8 +112,10 @@ class GpuBurst(ShaderProgram):
         self.burst_list.append(burst)
 
 
-def make_explosion(target, count=PARTICLE_COUNT):
+def make_explosion(target, count=PARTICLE_COUNT, screen_origin=(0, 0)):
     """Create a new explosion"""
-    target.manager.parent.window.shaders["GpuBurst"].make_explosion(
-        target.center_x, target.center_y, count
+    target.manager.parent.shaders["GpuBurst"].make_explosion(
+        target.position[0] + screen_origin[0],
+        target.position[1] + screen_origin[1],
+        count,
     )

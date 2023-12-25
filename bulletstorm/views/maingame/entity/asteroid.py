@@ -1,5 +1,5 @@
 from .core.base import Entity
-from ...app.log import setup_logging
+from ....log import setup_logging
 
 log = setup_logging(__name__)
 

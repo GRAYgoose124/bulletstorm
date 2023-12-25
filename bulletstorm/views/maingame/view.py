@@ -1,21 +1,25 @@
-import math
 import time
 import arcade
 import imgui
-import random
-from pathlib import Path
 
-from ..gui.page import Page
-from ...game.entity import Player
-from ...game.levels.spacelevel import SpaceLevel
+from ...gui.guiview import GuiView
 
-from ..gui.widgets.spacebattle import ShipUiWidget
-from ..gui.widgets.battlecore import BattleCoreWidget
+from .widgets.spacebattle import ShipUiWidget
+from .widgets.battlecore import BattleCoreWidget
+
+from .entity.particles.gpu_explosion import GpuBurst
+from .levels.spacelevel import SpaceLevel
+from .shader import ShaderViewMixin
 
 
-class SpaceGameView(Page):
+class SpaceGameView(GuiView, ShaderViewMixin):
     def __init__(self, window, name="primary", title="Primary"):
         super().__init__(window, name, title)
+        ShaderViewMixin.__init__(self)
+        # also add the shaders
+
+        self.add_shader(GpuBurst)
+
         self._game_over = False
         self._restart = False
 
@@ -65,8 +69,10 @@ class SpaceGameView(Page):
             self.player.center_x - self.window.width / 2,
             self.player.center_y - self.window.height / 2,
         )
-        self.camera_sprites.move_to(player_center, 0.9)
+        self.camera_sprites.move_to(player_center, 1.0)
         self.level.draw()
+        for shader in self.shaders.values():
+            shader.draw()
 
     def gui_draw(self):
         """Page method"""
@@ -75,9 +81,10 @@ class SpaceGameView(Page):
     def on_quit(self):
         self.window.close()
 
-    def on_update(self, delta_time: float):
+    def update(self, delta_time: float):
+        for shader in self.shaders.values():
+            shader.update(delta_time)
         self.level.update(delta_time)
-        super().on_update(delta_time)
 
     def on_hide_view(self):
         return super().on_hide_view()
