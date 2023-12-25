@@ -22,6 +22,7 @@ class EntityManager(arcade.PymunkPhysicsEngine):
         self.entity_graph = nx.Graph()
         self.edge_to_line = {}
         self.line_list: arcade.ShapeElementList = None
+        self.max_lines = 150
         self.explosions_list = arcade.SpriteList()
 
     @property
@@ -126,11 +127,15 @@ class EntityManager(arcade.PymunkPhysicsEngine):
         self.entities.draw()
         self.explosions_list.draw()
 
+    # Shockline could probably provide all... hrm refactor pl0x
     def _update_lines(self):
         # Update or create lines for each edge
         self.line_list = arcade.ShapeElementList()
+        self.edge_to_line = {}
         for edge in self.entity_graph.edges:
             entity_a, entity_b = edge
+            if (entity_b, entity_a) in self.edge_to_line:
+                continue
             # If the edge is new, create a line and add it to the dictionary
             x1, y1, x2, y2 = (
                 entity_a.center_x,
@@ -138,19 +143,32 @@ class EntityManager(arcade.PymunkPhysicsEngine):
                 entity_b.center_x,
                 entity_b.center_y,
             )
-            if (x1 - x2) ** 2 + (y1 - y2) ** 2 > self.parent.window.width**2:
+
+            distance_between = (x1 - x2) ** 2 + (y1 - y2) ** 2
+            if distance_between > self.parent.window.width**1.8:
                 continue
 
-            line = arcade.create_line(
-                x1,
-                y1,
-                x2,
-                y2,
-                arcade.color.WHITE,
-                2,
+            # create color based on entity graph dist from self.player, a or be could both be non players
+            # bad coupling this line stuff needs to be moved
+            a_gd, b_gd = 0, 0
+            if entity_a.tag != "player":
+                if nx.has_path(self.entity_graph, entity_a, self.parent.player):
+                    a_gd = self.graph_distance_from(entity_a, self.parent.player)
+            if entity_b.tag != "player":
+                if nx.has_path(self.entity_graph, entity_b, self.parent.player):
+                    b_gd = self.graph_distance_from(entity_b, self.parent.player)
+
+            color = (
+                (64 * a_gd) % 255,
+                (96 * b_gd) % 255,
+                255 - 72 * (a_gd + b_gd) % 255,
             )
+
+            line = arcade.create_line(x1, y1, x2, y2, color, 2)
             self.line_list.append(line)
             self.edge_to_line[edge] = line
+            if len(self.line_list) > self.max_lines:
+                break
 
     def add_line_between(self, entity_a: Entity, entity_b: Entity):
         self.entity_graph.add_edge(entity_a, entity_b)

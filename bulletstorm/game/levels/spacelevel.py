@@ -86,7 +86,7 @@ class SpaceLevel:
 
         # Randomly generate the asteroids
         placed = [(self.player.center_x, self.player.center_y)]
-        n = 500
+        n = 1200
         n_dist = n * 10
         max_tries = n // 2
         for _ in range(n):
