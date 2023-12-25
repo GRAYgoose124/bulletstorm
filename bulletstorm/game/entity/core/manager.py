@@ -19,10 +19,12 @@ class EntityManager(arcade.PymunkPhysicsEngine):
 
         self.worldspace_dims = (5000, 5000)
 
+        self.graph_line_list = arcade.ShapeElementList()
         self.entity_graph = nx.Graph()
         self.edge_to_line = {}
-        self.line_list = arcade.ShapeElementList()
         self.max_lines = 500
+
+        self.emitter_list = arcade.SpriteList()
         self.explosions_list = arcade.SpriteList()
 
     @property
@@ -123,14 +125,14 @@ class EntityManager(arcade.PymunkPhysicsEngine):
         super().step(delta_time)
 
     def draw(self):
-        self.line_list.draw()
+        self.graph_line_list.draw()
         self.entities.draw()
         self.explosions_list.draw()
 
     # Shockline could probably provide all... hrm refactor pl0x
     def _update_lines(self):
         # Update or create lines for each edge
-        self.line_list = arcade.ShapeElementList()
+        self.graph_line_list = arcade.ShapeElementList()
         self.edge_to_line = {}
         for edge in self.entity_graph.edges:
             entity_a, entity_b = edge
@@ -165,9 +167,9 @@ class EntityManager(arcade.PymunkPhysicsEngine):
             )
 
             line = arcade.create_line(x1, y1, x2, y2, color, 2)
-            self.line_list.append(line)
+            self.graph_line_list.append(line)
             self.edge_to_line[edge] = line
-            if len(self.line_list) > self.max_lines:
+            if len(self.graph_line_list) > self.max_lines:
                 break
 
     def add_line_between(self, entity_a: Entity, entity_b: Entity):

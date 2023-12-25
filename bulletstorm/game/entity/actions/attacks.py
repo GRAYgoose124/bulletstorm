@@ -4,7 +4,7 @@ import networkx as nx
 import numpy as np
 from ..projectile import Projectile
 
-from ..particles.explosion import make_explosion
+from ..particles.gpu_explosion import make_explosion
 
 
 def shoot(entity, target_tag="enemy"):
@@ -44,17 +44,14 @@ def shoot(entity, target_tag="enemy"):
 
 # shockline:
 def _shockline(player, target, dist):
-    dmg = random.randint(1, 3) * dist
+    dmg = random.randint(1, 7) * dist
 
-    # check against old hp just in case something else killed it - prob mitigates most cases
     old_hp = target.hp
     target.take_damage(dmg)
-    # if we kill the enemy, heal
+    # check against old hp just in case something else killed it - prob mitigates most cases
     if target.hp <= 0 and old_hp > 0:
+        # if we kill the enemy, heal
         player.hp += dmg * 0.5
-        dmg *= 2
-
-    # spawn explosion at target
     return dmg
 
 
@@ -63,14 +60,12 @@ def shockline(player):
     if player not in player.manager.entity_graph:
         return
 
-    for a, b in nx.dfs_edges(player.manager.entity_graph, source=player, depth_limit=4):
+    for a, b in nx.dfs_edges(player.manager.entity_graph, source=player, depth_limit=5):
         if a != player:
             dmg = _shockline(player, a, player.manager.graph_distance_from(player, a))
             target = a
         if b != player:
             dmg = _shockline(player, b, player.manager.graph_distance_from(player, b))
             target = b
-        d = player.manager.parent.window.width / 2
-        onscreen = target.position - player.position < (d, d)
-        if onscreen:
-            make_explosion(target, count=dmg * 2)
+
+        make_explosion(target, count=dmg * 50)
