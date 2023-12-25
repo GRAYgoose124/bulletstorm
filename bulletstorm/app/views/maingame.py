@@ -65,7 +65,7 @@ class SpaceGameView(Page):
             self.player.center_x - self.window.width / 2,
             self.player.center_y - self.window.height / 2,
         )
-        self.camera_sprites.move_to(player_center, 1.0)
+        self.camera_sprites.move_to(player_center, 0.9)
         self.level.draw()
 
     def gui_draw(self):

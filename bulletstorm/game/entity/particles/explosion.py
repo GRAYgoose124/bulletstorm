@@ -146,6 +146,6 @@ def make_explosion(target, count=PARTICLE_COUNT):
         particle.position = target.position
         target.manager.explosions_list.append(particle)
 
-    smoke = Smoke(count * 2)
+    smoke = Smoke(count)
     smoke.position = target.position
     target.manager.explosions_list.append(smoke)

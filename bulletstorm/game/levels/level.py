@@ -84,7 +84,7 @@ class SpaceLevel:
 
         # Randomly generate the asteroids
         placed = [(self.player.center_x, self.player.center_y)]
-        n = 100
+        n = 500
         n_dist = n * 10
         max_tries = n // 2
         for _ in range(n):
@@ -130,7 +130,7 @@ class SpaceLevel:
             )
             placed.append((rx, ry))
 
-    def update(self, delta_time: float):
+    def _update_asteroids(self):
         # move all the asteroids
         for asteroid in self.manager.by_tag("asteroid"):
             try:
@@ -148,6 +148,9 @@ class SpaceLevel:
                 force = [0.0, 0.0]
 
             self.manager.apply_force(asteroid, force)
+
+    def update(self, delta_time: float):
+        self._update_asteroids()
 
         # run the physics update
         self.manager.step(delta_time)

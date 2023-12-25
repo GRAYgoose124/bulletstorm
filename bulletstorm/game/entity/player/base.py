@@ -75,5 +75,5 @@ class Player(Entity):
         self.acceleration = [0, 0]
         self.change_angle = 0
         self.angular_acc = 0
-        self.hp = self._settings.max_hp
+        self.hp = self.gameplay_settings.MAX_HP
         self.is_firing = False

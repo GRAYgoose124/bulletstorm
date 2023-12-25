@@ -8,8 +8,8 @@ class Asteroid(Entity):
     def collision_handler(self, entity_a, entity_b, arbiter, space, data):
         # log.debug("collision between %s and %s", entity_a, entity_b)
         # damage player
-        if any([entity_a.tag == "player", entity_b.tag == "player"]):
-            print("collision between %s and %s" % (entity_a, entity_b))
+        # if any([entity_a.tag == "player", entity_b.tag == "player"]):
+        #     print("collision between %s and %s" % (entity_a, entity_b))
         if entity_b.tag == "player":
             target = entity_b
         elif entity_a.tag == "player":
