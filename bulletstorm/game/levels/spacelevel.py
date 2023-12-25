@@ -2,6 +2,8 @@ import arcade
 import random
 from pathlib import Path
 
+from pymunk import Vec2d
+
 from bulletstorm.game.entity import EntityManager, Player
 from bulletstorm.game.entity.core.manager import EntityAlreadyRemovedError
 
@@ -95,15 +97,15 @@ class SpaceLevel:
                 not all(
                     [
                         ((rx - x) ** 2 + (ry - y) ** 2) ** 0.5
-                        > (self.size[0] // n_dist)
+                        > (self.manager.worldspace_dims[0] // n_dist)
                         for x, y in placed
                     ]
                 )
                 and tries < max_tries
             ):
-                rx, ry = random.randint(0, self.size[0]), random.randint(
-                    0, self.size[1]
-                )
+                rx, ry = random.randint(
+                    0, self.manager.worldspace_dims[0]
+                ), random.randint(0, self.manager.worldspace_dims[1])
                 tries += 1
 
             # Create the asteroid
@@ -134,17 +136,17 @@ class SpaceLevel:
         # move all the asteroids
         for asteroid in self.manager.by_tag("asteroid"):
             try:
-                current_vel = self.manager.get_physics_object(asteroid).body.velocity
+                body = self.manager.get_physics_object(asteroid).body
             except EntityAlreadyRemovedError:
                 continue
 
-            random_force = [random.uniform(-1, 1), random.uniform(-1, 1)]
+            random_force = [random.uniform(-10, 10), random.uniform(-10, 10)]
             force = [
-                current_vel[0] * random.uniform(0.5, 1.5) or random_force[0],
-                current_vel[1] * random.uniform(0.5, 1.5) or random_force[1],
+                body.velocity[0] * random.uniform(0.5, 1.5) or random_force[0],
+                body.velocity[1] * random.uniform(0.5, 1.5) or random_force[1],
             ]
 
-            if (force[0] ** 2 + force[1] ** 2) > 100:
+            if (force[0] ** 2 + force[1] ** 2) > 1000:
                 force = [0.0, 0.0]
 
             self.manager.apply_force(asteroid, force)
@@ -154,8 +156,6 @@ class SpaceLevel:
 
         # run the physics update
         self.manager.step(delta_time)
-
-        # check if wrapped
 
         # check if player is dead
         if self.player.hp <= 0:

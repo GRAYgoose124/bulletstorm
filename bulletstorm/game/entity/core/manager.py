@@ -1,6 +1,7 @@
 import arcade
 import logging
 import networkx as nx
+from pymunk import Vec2d
 
 from .base import Entity
 
@@ -16,7 +17,11 @@ class EntityManager(arcade.PymunkPhysicsEngine):
         self._entity_list = arcade.SpriteList()
         self._entity_tags = {}
 
+        self.worldspace_dims = (5000, 5000)
+
         self.entity_graph = nx.Graph()
+        self.edge_to_line = {}
+        self.line_list: arcade.ShapeElementList = None
         self.explosions_list = arcade.SpriteList()
 
     @property
@@ -85,31 +90,68 @@ class EntityManager(arcade.PymunkPhysicsEngine):
         except KeyError:
             raise EntityAlreadyRemovedError("Entity has already been removed")
 
+    def _wrap_worldspace_body(self, pymunk_obj):
+        """Wrap the entity around the worldspace"""
+        # if entity outsize the worldbox, wrap it's pos toroidally
+        body = pymunk_obj.body
+        old_position = body.position
+        x, y = old_position.x, old_position.y
+
+        if (
+            old_position.x > self.worldspace_dims[0]
+            or old_position.x > self.worldspace_dims[0]
+        ):
+            x = -x
+        if (
+            old_position.y > self.worldspace_dims[1]
+            or old_position.y > self.worldspace_dims[1]
+        ):
+            y = -y
+        body.position = Vec2d(x, y)
+
     def step(self, delta_time):
         for entity in self._entity_list:
             if entity.hp <= 0:
                 self.remove_entity(entity)
+                continue
+            self._wrap_worldspace_body(self.get_physics_object(entity))
             entity.update(delta_time)
 
+        self._update_lines()
         self.explosions_list.update()
-
         super().step(delta_time)
 
     def draw(self):
-        # TODO: spritelist sorta thing?
-        for entity_a, entity_b in self.entity_graph.edges:
-            arcade.draw_line(
+        self.line_list.draw()
+        self.entities.draw()
+        self.explosions_list.draw()
+
+    def _update_lines(self):
+        # Update or create lines for each edge
+        self.line_list = arcade.ShapeElementList()
+        for edge in self.entity_graph.edges:
+            entity_a, entity_b = edge
+            # If the edge is new, create a line and add it to the dictionary
+            x1, y1, x2, y2 = (
                 entity_a.center_x,
                 entity_a.center_y,
                 entity_b.center_x,
                 entity_b.center_y,
+            )
+            if (x1 - x2) ** 2 + (y1 - y2) ** 2 > self.parent.window.width**2:
+                continue
+
+            line = arcade.create_line(
+                x1,
+                y1,
+                x2,
+                y2,
                 arcade.color.WHITE,
                 2,
             )
-        self.entities.draw()
-        self.explosions_list.draw()
+            self.line_list.append(line)
+            self.edge_to_line[edge] = line
 
-    # line stuff
     def add_line_between(self, entity_a: Entity, entity_b: Entity):
         self.entity_graph.add_edge(entity_a, entity_b)
 

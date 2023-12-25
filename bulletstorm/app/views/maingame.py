@@ -7,7 +7,7 @@ from pathlib import Path
 
 from ..gui.page import Page
 from ...game.entity import Player
-from ...game.levels.level import SpaceLevel
+from ...game.levels.spacelevel import SpaceLevel
 
 from ..gui.widgets.spacebattle import ShipUiWidget
 from ..gui.widgets.battlecore import BattleCoreWidget
