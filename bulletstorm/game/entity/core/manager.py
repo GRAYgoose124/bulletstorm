@@ -21,8 +21,8 @@ class EntityManager(arcade.PymunkPhysicsEngine):
 
         self.entity_graph = nx.Graph()
         self.edge_to_line = {}
-        self.line_list: arcade.ShapeElementList = None
-        self.max_lines = 150
+        self.line_list = arcade.ShapeElementList()
+        self.max_lines = 500
         self.explosions_list = arcade.SpriteList()
 
     @property
@@ -145,7 +145,7 @@ class EntityManager(arcade.PymunkPhysicsEngine):
             )
 
             distance_between = (x1 - x2) ** 2 + (y1 - y2) ** 2
-            if distance_between > self.parent.window.width**1.8:
+            if distance_between > self.parent.window.width**2:
                 continue
 
             # create color based on entity graph dist from self.player, a or be could both be non players

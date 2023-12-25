@@ -55,10 +55,7 @@ def _shockline(player, target, dist):
         dmg *= 2
 
     # spawn explosion at target
-    d = player.manager.parent.window.width / 2
-    onscreen = target.position - player.position < (d, d)
-    if onscreen:
-        make_explosion(target, count=dmg * 2)
+    return dmg
 
 
 def shockline(player):
@@ -68,6 +65,12 @@ def shockline(player):
 
     for a, b in nx.dfs_edges(player.manager.entity_graph, source=player, depth_limit=4):
         if a != player:
-            _shockline(player, a, player.manager.graph_distance_from(player, a))
+            dmg = _shockline(player, a, player.manager.graph_distance_from(player, a))
+            target = a
         if b != player:
-            _shockline(player, b, player.manager.graph_distance_from(player, b))
+            dmg = _shockline(player, b, player.manager.graph_distance_from(player, b))
+            target = b
+        d = player.manager.parent.window.width / 2
+        onscreen = target.position - player.position < (d, d)
+        if onscreen:
+            make_explosion(target, count=dmg * 2)
