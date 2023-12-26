@@ -23,12 +23,18 @@ class Asteroid(Entity):
         # if either entity has a line, connect a new one with manager - shockline op todo: upgrade for it
         if entity_a.tag == "asteroid" and entity_b.tag == "asteroid":
             if (
-                self.manager.has_line(entity_a)
-                or self.manager.has_line(entity_b)
-                and entity_a in self.manager.entity_graph
-                and self.manager.entity_graph.degree(entity_a) < 5
-                and entity_b in self.manager.entity_graph
-                and self.manager.entity_graph.degree(entity_b) < 5
+                self.manager.has_line(entity_a) or self.manager.has_line(entity_b)
+            ) and (
+                (
+                    entity_a in self.manager.entity_graph
+                    and self.manager.entity_graph.degree(entity_a) < 5
+                    or entity_a not in self.manager.entity_graph
+                )
+                and (
+                    entity_b in self.manager.entity_graph
+                    and self.manager.entity_graph.degree(entity_b) < 5
+                    or entity_b not in self.manager.entity_graph
+                )
             ):
                 self.manager.add_line_between(entity_a, entity_b)
 

@@ -2,6 +2,7 @@ import arcade
 import logging
 import networkx as nx
 from pymunk import Vec2d
+import pymunk
 
 from .base import Entity
 
@@ -98,12 +99,27 @@ class GraphLineMixin:
     def remove_entity_from_graph(self, entity: Entity):
         connected = list(self.entity_graph[entity])
         while len(connected):
-            self.entity_graph.remove_edge(entity, connected.pop())
+            edge = (entity, connected.pop())
+            self.entity_graph.remove_edge(*edge)
 
         self.entity_graph.remove_node(entity)
 
     def add_line_between(self, entity_a: Entity, entity_b: Entity):
         self.invalidate_all_disjoint_colors()
+
+        if entity_a != self.parent.player and entity_b != self.parent.player:
+            # bad coupling
+            c = pymunk.DampedSpring(
+                self.get_physics_object(entity_a).body,
+                self.get_physics_object(entity_b).body,
+                (0, 0),
+                (0, 0),
+                75,
+                1,
+                0.75,
+            )
+            self.space.add(c)
+
         self.entity_graph.add_edge(entity_a, entity_b)
 
     def has_line(self, entity: Entity):
@@ -179,8 +195,6 @@ class EntityManager(arcade.PymunkPhysicsEngine, GraphLineMixin):
         try:
             self.remove_sprite(entity, *args, **kwargs)
             self._entity_list.remove(entity)
-            # remove connected entities
-            # find set entries that contain entity
             self.remove_entity_from_graph(entity)
         except KeyError:
             pass
