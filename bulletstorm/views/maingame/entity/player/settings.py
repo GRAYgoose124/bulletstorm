@@ -11,10 +11,12 @@ class PlayerConfig(dict):
     MAX_TURN_VELOCITY: float = 5.0
     DRAG: float = 0.9
 
+    MAX_HP: int = 30
+
     SHOOT_COOLDOWN: float = 0.01
     PROJECTILE_SPEED: float = 500
 
-    MAX_HP: int = 30
+    SHOCKLINE_DEPTH: int = 3
 
 
 @dataclass

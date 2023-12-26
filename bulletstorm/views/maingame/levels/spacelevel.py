@@ -4,6 +4,8 @@ from pathlib import Path
 
 from pymunk import Vec2d
 
+from ..entity.projectile import Projectile
+
 from ..entity import EntityManager, Player
 from ..entity.core.manager import EntityAlreadyRemovedError
 
@@ -62,8 +64,9 @@ class SpaceLevel:
             self.player,
             mass=mass,
             tag="player",
-            collision_type="player",
-            collision_type_b="enemy",
+        )
+        self.manager.add_collision_handler(
+            "player", "asteroid", self.player.collision_handler
         )
 
     def __generate_asteroids(self):
@@ -111,22 +114,24 @@ class SpaceLevel:
             asteroid.velocity = [random.uniform(-1, 1), random.uniform(-1, 1)]
 
             if "tiny" in asset:
-                m = 0.3
+                m = 0.3 + random.uniform(-0.2, 0.2)
             elif "small" in asset:
-                m = 0.7
+                m = 0.7 + random.uniform(-0.2, 0.2)
             elif "med" in asset:
-                m = 1.5
+                m = 1.5 + random.uniform(-0.2, 0.2)
             elif "big" in asset:
-                m = 3.3
+                m = 3.3 + random.uniform(-0.2, 0.2)
             asteroid.hp = m * 5
 
             self.manager.add_entity(
                 asteroid,
                 tag="asteroid",
-                collision_type="enemy",
-                collision_type_b="player",
                 mass=m,
             )
+            self.manager.add_collision_handler(
+                "projectile", "asteroid", Projectile.collision_handler
+            )
+
             placed.append((rx, ry))
 
     def _update_asteroids(self):

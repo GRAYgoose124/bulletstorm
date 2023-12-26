@@ -24,11 +24,13 @@ def shoot(entity, target_tag="enemy"):
     )
     entity.manager.add_entity(
         projectile,
-        collision_type="projectile",
-        collision_type_b=target_tag,
         tag="projectile",
         collide_with_own_type=False,
     )
+    entity.manager.add_collision_handler(
+        "projectile", "asteroid", projectile.collision_handler
+    )
+
     proj = entity.manager.get_physics_object(projectile)
     proj.body.friction = 0
     # disable all collisions with the entity that spawned it
@@ -69,7 +71,11 @@ def shockline(player):
         ),
     )
 
-    for a, b in nx.dfs_edges(player.manager.entity_graph, source=player, depth_limit=3):
+    for a, b in nx.dfs_edges(
+        player.manager.entity_graph,
+        source=player,
+        depth_limit=player.gameplay_settings.SHOCKLINE_DEPTH,
+    ):
         if a != player:
             dmg = _shockline(player, a, player.manager.graph_distance_from(player, a))
             me(a)

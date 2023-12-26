@@ -1,3 +1,4 @@
+from pymunk import Vec2d
 from .core.base import Entity
 from ....log import setup_logging
 
@@ -10,15 +11,16 @@ class Asteroid(Entity):
         # damage player
         # if any([entity_a.tag == "player", entity_b.tag == "player"]):
         #     print("collision between %s and %s" % (entity_a, entity_b))
-        if entity_b.tag == "player":
-            target = entity_b
-        elif entity_a.tag == "player":
-            target = entity_a
-        else:
-            target = None
+        # if entity_b.tag == "player":
+        #     target = entity_b
+        # elif entity_a.tag == "player":
+        #     target = entity_a
+        # else:
+        #     target = None
 
-        if target is not None:
-            target.take_damage(1, cooldown=0)
+        # if target is not None:
+        #     impact_vel = arbiter.total_impulse.length
+        #     target.take_damage(10 * impact_vel, cooldown=0)
 
         # if either entity has a line, connect a new one with manager - shockline op todo: upgrade for it
         if entity_a.tag == "asteroid" and entity_b.tag == "asteroid":

@@ -12,9 +12,10 @@ class Projectile(Entity):
         self.manager.remove_entity(entity_a)
 
         # damage sprite_b
-        if self.origin == "player" and entity_b.tag == "enemy":
+        if self.origin.tag == "player" and entity_b.tag == "asteroid":
             entity_b.take_damage(5)
 
-        # add line from origin to sprite_b
-        self.manager.add_line_between(self.origin, entity_b)
-        return False
+            # add line from origin to sprite_b
+            self.manager.add_line_between(self.origin, entity_b)
+
+        return True

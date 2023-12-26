@@ -47,6 +47,8 @@ class Player(Entity):
         self.manager.apply_impulse(self, self.acceleration)
 
     def collision_handler(self, sprite_a, sprite_b, arbiter, space, data):
+        # do self damage
+        self.take_damage(arbiter.total_ke * 10.0)
         return True
 
     def key_handler(self, key, modifiers, release=False):

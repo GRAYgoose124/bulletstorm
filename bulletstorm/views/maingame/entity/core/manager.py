@@ -114,7 +114,7 @@ class GraphLineMixin:
         self.entity_graph.remove_edge(*edge)
 
     def remove_constraints_on_entity(self, entity):
-        for edge in list(self.constraints.keys()):
+        for edge in list(self.constraints):
             if entity in edge:
                 self.space.remove(self.constraints[edge])
                 del self.constraints[edge]
@@ -135,12 +135,14 @@ class GraphLineMixin:
 
         # if entity_a != self.parent.player and entity_b != self.parent.player:
         # bad coupling
+        ba = self.get_physics_object(entity_a).body
+        bb = self.get_physics_object(entity_b).body
         c = pymunk.DampedSpring(
-            self.get_physics_object(entity_a).body,
-            self.get_physics_object(entity_b).body,
+            ba,
+            bb,
             (0, 0),
             (0, 0),
-            75,
+            ba.mass * bb.mass * 25,
             1,
             0.75,
         )
@@ -184,38 +186,27 @@ class EntityManager(arcade.PymunkPhysicsEngine, GraphLineMixin):
         entity: Entity,
         *args,
         tag="entity",
-        collision_type=None,
-        collision_type_b=None,
-        collision_handler=None,
+        collision_handlers: dict[str, callable] = None,
         collide_with_own_type=True,
         **kwargs
     ):
-        if collision_handler is None:
-            collision_handler = entity.collision_handler
+        entity.manager = self
+        entity.tag = tag
+        kwargs["collision_type"] = tag
 
-        if collision_type is not None:
-            kwargs["collision_type"] = collision_type
+        # also register the self collision handler TODO: it's own method
+        if collide_with_own_type:
+            self.add_collision_handler(entity.tag, entity.tag, entity.collision_handler)
 
-            if collision_type_b is None:
-                collision_type_b = collision_type
-            else:
-                # also register the self collision handler TODO: it's own method
-                if collide_with_own_type:
-                    self.add_collision_handler(
-                        collision_type, collision_type, collision_handler
-                    )
+        if collision_handlers is None:
+            collision_handlers = {entity.tag: entity.collision_handler}
 
-            # the other entity's collision handler  will be registered by it's own add_entity call
-            self.add_collision_handler(
-                collision_type, collision_type_b, collision_handler
-            )
+        for collision_type, collision_handler in collision_handlers.items():
+            self.add_collision_handler(entity.tag, collision_type, collision_handler)
 
         self.add_sprite(entity, *args, **kwargs)
         self._entity_list.append(entity)
         self._entity_tags.setdefault(tag, []).append(entity)
-
-        entity.manager = self
-        entity.tag = tag
 
     def remove_entity(self, entity: Entity, *args, **kwargs):
         try:
@@ -261,7 +252,8 @@ class EntityManager(arcade.PymunkPhysicsEngine, GraphLineMixin):
                 self.remove_entity(entity)
                 continue
             if self._wrap_worldspace_body(self.get_physics_object(entity)):
-                self.remove_constraints_on_entity(entity)
+                pass
+                # self.remove_constraints_on_entity(entity)
             entity.update(delta_time)
 
         self._update_lines()
