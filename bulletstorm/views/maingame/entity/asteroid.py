@@ -24,8 +24,10 @@ class Asteroid(Entity):
         if entity_a.tag == "asteroid" and entity_b.tag == "asteroid":
             if (
                 self.manager.has_line(entity_a)
-                and self.manager.entity_graph.degree(entity_a) < 5
                 or self.manager.has_line(entity_b)
+                and entity_a in self.manager.entity_graph
+                and self.manager.entity_graph.degree(entity_a) < 5
+                and entity_b in self.manager.entity_graph
                 and self.manager.entity_graph.degree(entity_b) < 5
             ):
                 self.manager.add_line_between(entity_a, entity_b)

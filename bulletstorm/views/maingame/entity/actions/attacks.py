@@ -69,7 +69,7 @@ def shockline(player):
         ),
     )
 
-    for a, b in nx.dfs_edges(player.manager.entity_graph, source=player, depth_limit=5):
+    for a, b in nx.dfs_edges(player.manager.entity_graph, source=player, depth_limit=3):
         if a != player:
             dmg = _shockline(player, a, player.manager.graph_distance_from(player, a))
             me(a)
