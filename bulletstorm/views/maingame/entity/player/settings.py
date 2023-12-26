@@ -26,6 +26,8 @@ class PlayerKeybinds(dict):
 
     SHOOT: int = arcade.key.SPACE
     SHOCKLINE: int = arcade.key.V
+    DISCONNECT: int = arcade.key.B
+    SPLIT: int = arcade.key.G
 
     PAUSE_MENU: int = arcade.key.ESCAPE
 

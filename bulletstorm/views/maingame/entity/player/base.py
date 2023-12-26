@@ -62,6 +62,7 @@ class Player(Entity):
             self.change_angle = 0 if release else self.gameplay_settings.TURN_VELOCITY
         elif key == self.keybinds.TURN_RIGHT:
             self.change_angle = 0 if release else -self.gameplay_settings.TURN_VELOCITY
+        # actions
         elif key == self.keybinds.SHOOT:
             # self.is_firing = not release
             if not release:
@@ -69,6 +70,21 @@ class Player(Entity):
         elif key == self.keybinds.SHOCKLINE:
             if not release:
                 shockline(self)
+        elif key == self.keybinds.DISCONNECT:
+            if not release:
+                # disconnect one line from the player
+                if self.manager.has_line(self):
+                    neighbors = self.manager.entity_graph.adj[self]
+                    if neighbors:
+                        self.manager.remove_line_from(self, next(iter(neighbors)))
+        elif key == self.keybinds.SPLIT:
+            if not release:
+                # follow the lines from the player and split from the first node that is not the player
+                if self.manager.has_line(self):
+                    neighbors = self.manager.entity_graph.adj[self]
+                    if neighbors:
+                        for n in list(neighbors):
+                            self.manager.remove_entity_from_graph(n)
 
     def reset(self):
         self.angle = 0

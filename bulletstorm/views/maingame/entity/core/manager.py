@@ -17,6 +17,7 @@ class GraphLineMixin:
         self.entity_graph = nx.Graph()
         self.edge_to_line = {}
         self.cached_edge_colors = {}
+        self.constraints = {}
         self.max_lines = 500
 
         # Shockline could probably provide all... hrm refactor pl0x
@@ -96,30 +97,55 @@ class GraphLineMixin:
                 elif not nx.has_path(self.entity_graph, self.parent.player, edge[1]):
                     del self.cached_edge_colors[edge]
 
-    def remove_entity_from_graph(self, entity: Entity):
+    def remove_line_from(self, entity_a: Entity, entity_b: Entity):
+        edge = (entity_a, entity_b)
+        tedge = (entity_b, entity_a)
+        if edge in self.constraints:
+            self.space.remove(self.constraints[edge])
+            del self.constraints[edge]
+        elif tedge in self.constraints:
+            self.space.remove(self.constraints[tedge])
+            del self.constraints[tedge]
+
+        if edge in self.edge_to_line:
+            del self.edge_to_line[edge]
+        if edge in self.cached_edge_colors:
+            del self.cached_edge_colors[edge]
+        self.entity_graph.remove_edge(*edge)
+
+    def remove_constraints_on_entity(self, entity):
+        for edge in list(self.constraints.keys()):
+            if entity in edge:
+                self.space.remove(self.constraints[edge])
+                del self.constraints[edge]
+
+    def remove_edges_to_entity_from_graph(self, entity):
         connected = list(self.entity_graph[entity])
         while len(connected):
             edge = (entity, connected.pop())
             self.entity_graph.remove_edge(*edge)
 
+    def remove_entity_from_graph(self, entity: Entity):
+        self.remove_edges_to_entity_from_graph(entity)
+        self.remove_constraints_on_entity(entity)
         self.entity_graph.remove_node(entity)
 
     def add_line_between(self, entity_a: Entity, entity_b: Entity):
         self.invalidate_all_disjoint_colors()
 
-        if entity_a != self.parent.player and entity_b != self.parent.player:
-            # bad coupling
-            c = pymunk.DampedSpring(
-                self.get_physics_object(entity_a).body,
-                self.get_physics_object(entity_b).body,
-                (0, 0),
-                (0, 0),
-                75,
-                1,
-                0.75,
-            )
-            self.space.add(c)
-
+        # if entity_a != self.parent.player and entity_b != self.parent.player:
+        # bad coupling
+        c = pymunk.DampedSpring(
+            self.get_physics_object(entity_a).body,
+            self.get_physics_object(entity_b).body,
+            (0, 0),
+            (0, 0),
+            75,
+            1,
+            0.75,
+        )
+        self.space.add(c)
+        self.constraints[(entity_a, entity_b)] = c
         self.entity_graph.add_edge(entity_a, entity_b)
 
     def has_line(self, entity: Entity):
@@ -211,25 +237,31 @@ class EntityManager(arcade.PymunkPhysicsEngine, GraphLineMixin):
         body = pymunk_obj.body
         old_position = body.position
         x, y = old_position.x, old_position.y
+        wrapped = False
 
         if (
             old_position.x > self.worldspace_dims[0]
             or old_position.x > self.worldspace_dims[0]
         ):
+            wrapped = True
             x = -x
         if (
             old_position.y > self.worldspace_dims[1]
             or old_position.y > self.worldspace_dims[1]
         ):
+            wrapped = True
             y = -y
         body.position = Vec2d(x, y)
+
+        return wrapped
 
     def step(self, delta_time):
         for entity in self._entity_list:
             if entity.hp <= 0:
                 self.remove_entity(entity)
                 continue
-            self._wrap_worldspace_body(self.get_physics_object(entity))
+            if self._wrap_worldspace_body(self.get_physics_object(entity)):
+                self.remove_constraints_on_entity(entity)
             entity.update(delta_time)
 
         self._update_lines()
