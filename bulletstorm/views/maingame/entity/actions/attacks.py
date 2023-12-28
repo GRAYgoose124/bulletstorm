@@ -30,6 +30,9 @@ def shoot(entity, target_tag="enemy"):
     entity.manager.add_collision_handler(
         "projectile", "asteroid", projectile.collision_handler
     )
+    entity.manager.add_collision_handler(
+        "projectile", "agent", projectile.collision_handler
+    )
 
     proj = entity.manager.get_physics_object(projectile)
     proj.body.friction = 0

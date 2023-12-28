@@ -2,11 +2,13 @@ import arcade
 import random
 from pathlib import Path
 
+import pymunk
 from pymunk import Vec2d
 
 from ..entity.projectile import Projectile
 
-from ..entity import EntityManager, Player
+from ..entity import Player
+from ..entity.core.agent import AgentManager
 from ..entity.core.manager import EntityAlreadyRemovedError
 
 from ..entity.asteroid import Asteroid
@@ -24,10 +26,14 @@ class SpaceLevel:
         self.setup()
 
     def setup(self):
-        self.manager = EntityManager(self.parent)
+        self.manager = AgentManager(self.parent)
 
         self.__spawn_player()
         self.__generate_asteroids()
+        self.manager._generate_worldspace_bounds()
+        self._update_asteroids()
+
+        self.__generate_simple_agent()
 
     def resize(self, width, height):
         self.size = (width, height)
@@ -64,9 +70,21 @@ class SpaceLevel:
             self.player,
             mass=mass,
             tag="player",
+            collide_with_own_type=False,
         )
+        self.manager.entity_graph.add_node(self.player)
         self.manager.add_collision_handler(
             "player", "asteroid", self.player.collision_handler
+        )
+
+    def __generate_simple_agent(self):
+        base_entity_cls = Asteroid
+        base_args = (
+            (":resources:images/space_shooter/meteorGrey_big1.png", 0.5),
+            {"center_x": 100, "center_y": 100},
+        )
+        self.manager.add_agent(
+            base_entity_cls, base_args, [(0, 1), (1, 2), (2, 3), (2, 0)]
         )
 
     def __generate_asteroids(self):
@@ -128,9 +146,6 @@ class SpaceLevel:
                 tag="asteroid",
                 mass=m,
             )
-            self.manager.add_collision_handler(
-                "projectile", "asteroid", Projectile.collision_handler
-            )
 
             placed.append((rx, ry))
 
@@ -142,19 +157,12 @@ class SpaceLevel:
             except EntityAlreadyRemovedError:
                 continue
 
-            random_force = [random.uniform(-10, 10), random.uniform(-10, 10)]
-            force = [
-                body.velocity[0] * random.uniform(0.5, 1.5) or random_force[0],
-                body.velocity[1] * random.uniform(0.5, 1.5) or random_force[1],
-            ]
-
-            if (force[0] ** 2 + force[1] ** 2) > 1000:
-                force = [0.0, 0.0]
+            force = [random.uniform(-100, 100), random.uniform(-100, 100)]
 
             self.manager.apply_force(asteroid, force)
 
     def update(self, delta_time: float):
-        self._update_asteroids()
+        # self._update_asteroids()
 
         # run the physics update
         self.manager.step(delta_time)

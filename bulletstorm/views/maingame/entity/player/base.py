@@ -47,8 +47,9 @@ class Player(Entity):
         self.manager.apply_impulse(self, self.acceleration)
 
     def collision_handler(self, sprite_a, sprite_b, arbiter, space, data):
-        # do self damage
-        self.take_damage(arbiter.total_ke * 10.0)
+        if sprite_b is not None and sprite_a is not None:
+            # do self damage if we hit an asteroid
+            self.take_damage(1, cooldown=0)
         return True
 
     def key_handler(self, key, modifiers, release=False):
@@ -87,6 +88,9 @@ class Player(Entity):
                     if neighbors:
                         for n in list(neighbors):
                             self.manager.remove_entity_from_graph(n)
+                else:
+                    # remove constraints just in case
+                    self.manager.remove_constraints(self)
 
     def reset(self):
         self.angle = 0

@@ -12,7 +12,9 @@ class Projectile(Entity):
         self.manager.remove_entity(entity_a)
 
         # damage sprite_b
-        if self.origin.tag == "player" and entity_b.tag == "asteroid":
+        if self.origin.tag == "player" and (
+            entity_b.tag == "agent" or entity_b.tag == "asteroid"
+        ):
             entity_b.take_damage(5)
 
             # add line from origin to sprite_b

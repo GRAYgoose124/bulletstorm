@@ -4,13 +4,15 @@ import arcade
 
 class Entity(arcade.Sprite):
     def __init__(self, *args, **kwargs):
+        # pop hp
+        hp = kwargs.pop("hp", 5)
         super().__init__(*args, **kwargs)
         # set by the entity manager
         self.body = None
         self.manager = None
 
         # game data
-        self.hp = 5
+        self.hp = hp
         self.cooldown = 0
         self.is_firing = False
 
