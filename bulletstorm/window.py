@@ -11,7 +11,7 @@ class BulletStorm(arcade.Window):
         super().__init__(
             1280,
             720,
-            "B. S. - Time to get your degree",
+            "Bulletstorm: B.S. - Time to get your degree",
             gl_version=(4, 3),
             resizable=True,
         )

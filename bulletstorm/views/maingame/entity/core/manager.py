@@ -71,6 +71,9 @@ class EntityManager(arcade.PymunkPhysicsEngine):
         except KeyError:
             raise EntityAlreadyRemovedError("Entity has already been removed")
 
+    def get_worldspace_center(self):
+        return self.worldspace_dims[0] // 2, self.worldspace_dims[1] // 2
+
     def _wrap_worldspace_body(self, pymunk_obj):
         """Wrap the entity around the worldspace"""
         # if entity outsize the worldbox, wrap it's pos toroidally

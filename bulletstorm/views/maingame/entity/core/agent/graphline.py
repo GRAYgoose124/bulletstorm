@@ -1,12 +1,7 @@
 import arcade
 import networkx as nx
 import pymunk
-from .base import Entity
-from .manager import EntityManager
-
-
-class Agent(Entity):
-    pass
+from ..base import Entity
 
 
 class GraphLineMixin:
@@ -160,54 +155,3 @@ class GraphLineMixin:
 
     def graph_distance_from(self, entity_a: Entity, entity_b: Entity):
         return nx.shortest_path_length(self.entity_graph, entity_a, entity_b)
-
-
-class AgentManager(EntityManager, GraphLineMixin):
-    def __init__(self, parent) -> None:
-        EntityManager.__init__(self, parent)
-        GraphLineMixin.__init__(self)
-
-        self.agent_ids = []
-        self.original_agent_edges = {}
-
-    def step(self, delta_time):
-        super().step(delta_time)
-        self._update_lines()
-
-    def remove_entity(self, entity: Entity, *args, **kwargs):
-        try:
-            super().remove_entity(entity, *args, **kwargs)
-            self.remove_entity_from_graph(entity)
-        except KeyError:
-            pass
-
-    def add_agent(
-        self,
-        base_entity_cls: Entity,
-        base_args: tuple,
-        internal_edges: list[tuple[int]],
-        tag: str = "agent",
-    ):
-        # update center_x and center_y by scaling by edges
-
-        base_args[1]["hp"] = 50
-
-        nodes = [
-            base_entity_cls(*base_args[0], **base_args[1])
-            for _ in range(len(internal_edges) + 1)
-        ]
-        for node in nodes:
-            self.add_entity(node, tag=tag)
-            self.entity_graph.add_node(node)
-
-        node_edges = []
-        # use the internal edges to connect the nodes
-        for edge in internal_edges:
-            ne = (nodes[edge[0]], nodes[edge[1]])
-            node_edges.append(ne)
-            self.add_line_between(*ne)
-
-        agent_id = len(self.agent_ids)
-        self.agent_ids.append(agent_id)
-        self.original_agent_edges[agent_id] = node_edges
-        print(self.entity_graph)

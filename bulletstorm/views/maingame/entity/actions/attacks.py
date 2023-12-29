@@ -2,9 +2,9 @@ import random
 import arcade
 import networkx as nx
 import numpy as np
-from ..projectile import Projectile
 
 from ..particles.gpu_explosion import make_explosion
+from ...entities.projectile import Projectile
 
 
 def shoot(entity, target_tag="enemy"):

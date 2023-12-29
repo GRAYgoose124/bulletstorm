@@ -1,5 +1,5 @@
 from pymunk import Vec2d
-from .core.base import Entity
+from ..entity.core.base import Entity
 from ....log import setup_logging
 
 log = setup_logging(__name__)

@@ -5,13 +5,14 @@ from pathlib import Path
 import pymunk
 from pymunk import Vec2d
 
-from ..entity.projectile import Projectile
 
 from ..entity import Player
-from ..entity.core.agent import AgentManager
+from ..entity.core.agent.manager import AgentManager
+from ..entity.core.agent.core import AgentForce
 from ..entity.core.manager import EntityAlreadyRemovedError
 
-from ..entity.asteroid import Asteroid
+from ..entities.projectile import Projectile
+from ..entities.asteroid import Asteroid
 
 
 class SpaceLevel:
@@ -58,10 +59,11 @@ class SpaceLevel:
             root / "ship.png", image_x=0, image_y=0, image_width=48, image_height=48
         )
 
-        # Set the player in the center
+        # Set the player in the center of screen / not worldspace
         if position is None:
-            self.player.center_x = self.size[0] // 2
-            self.player.center_y = self.size[1] // 2
+            h, w = self.manager.get_worldspace_center()
+            self.player.center_x = h
+            self.player.center_y = w
         else:
             self.player.center_x = position[0]
             self.player.center_y = position[1]
@@ -81,10 +83,16 @@ class SpaceLevel:
         base_entity_cls = Asteroid
         base_args = (
             (":resources:images/space_shooter/meteorGrey_big1.png", 0.5),
-            {"center_x": 100, "center_y": 100},
+            {"center_x": 50, "center_y": 50},
         )
+        forces = {
+            (0, 1): AgentForce(),
+            (1, 2): AgentForce(),
+            (2, 3): AgentForce(),
+            (3, 0): AgentForce(),
+        }
         self.manager.add_agent(
-            base_entity_cls, base_args, [(0, 1), (1, 2), (2, 3), (2, 0)]
+            base_entity_cls, base_args, [(0, 1), (1, 2), (2, 3), (3, 0)], forces
         )
 
     def __generate_asteroids(self):

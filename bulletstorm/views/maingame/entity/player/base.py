@@ -3,7 +3,7 @@ import time
 import arcade
 
 from ...entity import Entity
-from ...entity.projectile import Projectile
+from ...entities.projectile import Projectile
 
 from .settings import PlayerSettings
 from ..actions.attacks import shoot, shockline

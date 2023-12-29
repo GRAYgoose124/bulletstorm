@@ -1,6 +1,6 @@
 from .core.base import Entity
-from .core.agent import Agent, AgentManager
-from .core.manager import EntityManager
+from .core.agent.core import Agent, AgentForce
+from .core.agent.manager import AgentManager
 
 
 from .player.base import Player
