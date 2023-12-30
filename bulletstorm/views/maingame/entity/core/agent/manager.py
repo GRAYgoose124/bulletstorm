@@ -1,5 +1,5 @@
 from .graphline import GraphLineMixin
-from .core import Agent, AgentForce
+from .core import Agent, AgentForce, AgentSpec
 
 from ..manager import EntityManager
 from ..base import Entity
@@ -34,21 +34,16 @@ class AgentManager(EntityManager, GraphLineMixin):
 
     def add_agent(
         self,
-        base_entity_cls: type,
-        base_args: tuple,
-        internal_edges: list[tuple[int]],
-        forces: dict[tuple[int], AgentForce] = None,
-        center=None,
+        spec: AgentSpec,
+        center: tuple[float, float] = None,
         tag: str = "agent",
     ):
         center = center or self.get_worldspace_center()
 
-        agent = Agent.generate_and_add_agent(
-            self, base_entity_cls, base_args, internal_edges, forces, center
-        )
-        agent_id = len(self.agent_ids)
-        self.agent_ids.append(agent_id)
-        self.agents[agent_id] = agent
+        # agent = Agent.generate_and_add_agent(
+        #     self, base_entity_cls, base_args, internal_edges, forces, center
+        # )
+        spec.add_to_manager(self, center)
 
     def _update_agent_forces(self):
         for agent_id, agent in self.agents.items():

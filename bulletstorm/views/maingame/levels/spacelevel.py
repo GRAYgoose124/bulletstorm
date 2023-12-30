@@ -8,11 +8,10 @@ from pymunk import Vec2d
 
 from ..entity import Player
 from ..entity.core.agent.manager import AgentManager
-from ..entity.core.agent.core import AgentForce
 from ..entity.core.manager import EntityAlreadyRemovedError
 
-from ..entities.projectile import Projectile
 from ..entities.asteroid import Asteroid
+from ..entities.simpleagent import Catcher
 
 
 class SpaceLevel:
@@ -34,7 +33,7 @@ class SpaceLevel:
         self.manager._generate_worldspace_bounds()
         self._update_asteroids()
 
-        self.__generate_simple_agent()
+        self.manager.add_agent(Catcher)
 
     def resize(self, width, height):
         self.size = (width, height)
@@ -77,22 +76,6 @@ class SpaceLevel:
         self.manager.entity_graph.add_node(self.player)
         self.manager.add_collision_handler(
             "player", "asteroid", self.player.collision_handler
-        )
-
-    def __generate_simple_agent(self):
-        base_entity_cls = Asteroid
-        base_args = (
-            (":resources:images/space_shooter/meteorGrey_big1.png", 0.5),
-            {"center_x": 50, "center_y": 50},
-        )
-        forces = {
-            (0, 1): AgentForce(),
-            (1, 2): AgentForce(),
-            (2, 3): AgentForce(),
-            (3, 0): AgentForce(),
-        }
-        self.manager.add_agent(
-            base_entity_cls, base_args, [(0, 1), (1, 2), (2, 3), (3, 0)], forces
         )
 
     def __generate_asteroids(self):
