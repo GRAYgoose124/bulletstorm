@@ -1,12 +1,7 @@
-from dataclasses import dataclass
-import time
-import arcade
-
-from ...entity import Entity
-from ...entities.projectile import Projectile
+from ...entity.base import Entity
 
 from .settings import PlayerSettings
-from ..actions.attacks import shoot, shockline
+from ...entities.actions.attacks import shoot, shockline
 
 
 class Player(Entity):

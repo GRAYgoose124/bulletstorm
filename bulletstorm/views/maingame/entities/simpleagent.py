@@ -1,6 +1,6 @@
 from pymunk import Vec2d
-from ..entity.core.agent.core import Agent, AgentForce, AgentSpec
-from ..entities.asteroid import Asteroid
+from ..entity.agent.core import AgentForce, AgentSpec
+from .asteroid import Asteroid
 
 # TODO: should be a particle, follow explosion's lead.
 

@@ -3,7 +3,7 @@ import arcade
 import networkx as nx
 import numpy as np
 
-from ..particles.gpu_explosion import make_explosion
+from ...particles.gpu_explosion import make_explosion
 from ...entities.projectile import Projectile
 
 

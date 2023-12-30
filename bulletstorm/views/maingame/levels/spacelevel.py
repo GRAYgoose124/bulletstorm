@@ -1,15 +1,10 @@
-import arcade
 import random
 from pathlib import Path
 
-import pymunk
-from pymunk import Vec2d
+from ..entity.agent.manager import AgentManager
+from ..entity.manager import EntityAlreadyRemovedError
 
-
-from ..entity import Player
-from ..entity.core.agent.manager import AgentManager
-from ..entity.core.manager import EntityAlreadyRemovedError
-
+from ..entities.player import Player
 from ..entities.asteroid import Asteroid
 from ..entities.simpleagent import Catcher
 

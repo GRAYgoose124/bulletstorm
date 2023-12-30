@@ -7,7 +7,7 @@ from ...gui.guiview import GuiView
 from .widgets.spacebattle import ShipUiWidget
 from .widgets.battlecore import BattleCoreWidget
 
-from .entity.particles.gpu_explosion import GpuBurst
+from .particles.gpu_explosion import GpuBurst
 from .levels.spacelevel import SpaceLevel
 from .shader import ShaderViewMixin
 

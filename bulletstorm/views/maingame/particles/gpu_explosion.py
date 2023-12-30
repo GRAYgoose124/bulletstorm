@@ -11,7 +11,7 @@ from dataclasses import dataclass
 import arcade
 import arcade.gl
 
-from .shader import ShaderProgram
+from .shaders.base import ShaderProgram
 
 PARTICLE_COUNT = 300
 
