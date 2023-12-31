@@ -1,8 +1,24 @@
 from pymunk import Vec2d
-from ..entity.agent.core import AgentForce, AgentSpec
+
+from bulletstorm.views.maingame.entity.base import Entity
+from ..entity.agent.core import AgentForce, AgentSpec, AgentCollisionHandler
 from .asteroid import Asteroid
 
-# TODO: should be a particle, follow explosion's lead.
+
+class ImpulseOnCollision(AgentCollisionHandler):
+    def handle(self, entity_a: Entity, entity_b: Entity, arbiter, space, data):
+        # repel the two entities
+        force = 1.0
+
+        body_a = entity_a.manager.get_physics_object(entity_a).body
+        body_b = entity_b.manager.get_physics_object(entity_b).body
+
+        b_to_a = Vec2d(*entity_a.position) - entity_b.position
+        b_to_a = b_to_a.normalized()
+
+        body_a.apply_impulse_at_local_point(-b_to_a * force, (0, 0))
+        body_b.apply_impulse_at_local_point(-b_to_a * force, (0, 0))
+        return True
 
 
 class ConstrictionForce(AgentForce):
@@ -19,27 +35,18 @@ class ConstrictionForce(AgentForce):
         body_b.apply_impulse_at_local_point(b_to_a * force, (0, 0))
 
 
-class SimpleAgentSpec(AgentSpec):
-    base_entity_cls = Asteroid
-    base_args = (
+Catcher = AgentSpec(
+    base_entity_cls=Asteroid,
+    base_args=(
         (":resources:images/space_shooter/meteorGrey_big1.png", 0.5),
         {"center_x": 50, "center_y": 50, "hp": 50},
-    )
-    internal_edges = [(0, 1), (1, 2), (2, 3), (3, 0)]
-    forces = {
+    ),
+    internal_edges=[(0, 1), (1, 2), (2, 3), (3, 0)],
+    forces={
         (0, 1): ConstrictionForce(),
         (1, 2): ConstrictionForce(),
         (2, 3): ConstrictionForce(),
         (3, 0): ConstrictionForce(),
-    }
-
-    def __init__(self):
-        super().__init__(
-            self.base_entity_cls,
-            self.base_args,
-            self.internal_edges,
-            self.forces,
-        )
-
-
-Catcher = SimpleAgentSpec()
+    },
+    collision_handlers=[ImpulseOnCollision()],
+)

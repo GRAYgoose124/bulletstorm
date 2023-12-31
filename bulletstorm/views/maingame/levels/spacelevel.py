@@ -28,7 +28,7 @@ class SpaceLevel:
         self.manager._generate_worldspace_bounds()
         self._update_asteroids()
 
-        self.manager.add_agent(Catcher)
+        Catcher.add_to_manager(self.manager, self.manager.get_worldspace_center())
 
     def resize(self, width, height):
         self.size = (width, height)

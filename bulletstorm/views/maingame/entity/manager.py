@@ -57,6 +57,7 @@ class EntityManager(arcade.PymunkPhysicsEngine):
         self.add_sprite(entity, *args, **kwargs)
         self._entity_list.append(entity)
         self._entity_tags.setdefault(tag, []).append(entity)
+        entity.entity_id = len(self._entity_list) - 1
 
     def remove_entity(self, entity: Entity, *args, **kwargs):
         try:
