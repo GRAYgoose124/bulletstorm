@@ -4,7 +4,8 @@
 - [x] Screen wrapping and scrolling modes
 - [x] Game Over restart option
 - [x] turn based battle core (lol)
-
+- [ ] "Agents" Multi-entity subgraphs with specialized graph forces. 
+    - [ ] Catcher - baseball glove-like entity that can catch foreign entities. 
 ### Fixes
  - Player collision handler? Fix comparing with sprite list.
  - Rather than removing all angular velocity, we should subtract the turning from it.

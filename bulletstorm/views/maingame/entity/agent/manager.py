@@ -1,3 +1,4 @@
+from multiprocessing import Process
 from .graphline import GraphLineMixin
 from .core import Agent, AgentEvent, AgentSpec
 

@@ -110,8 +110,7 @@ class Agent:
         self.agent_id = None
 
     def apply_forces(self):
-        try:
-            for edge, force in self.edge_forces.items():
-                force.apply(*self.entity_edges[edge])
-        except EntityAlreadyRemovedError:
-            pass
+        for edge, force in self.edge_forces.items():
+            a, b = self.entity_edges[edge]
+            if a in a.manager.entity_graph and b in b.manager.entity_graph:
+                force.apply(a, b)
