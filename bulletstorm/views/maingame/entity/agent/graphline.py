@@ -89,9 +89,11 @@ class GraphLineMixin:
     def invalidate_all_disjoint_colors(self):
         for edge in self.entity_graph.edges:
             if edge in self.cached_edge_colors:
-                if not nx.has_path(self.entity_graph, self.parent.player, edge[0]):
-                    del self.cached_edge_colors[edge]
-                elif not nx.has_path(self.entity_graph, self.parent.player, edge[1]):
+                if (
+                    self.parent.player not in self.entity_graph
+                    or not nx.has_path(self.entity_graph, self.parent.player, edge[0])
+                    or not nx.has_path(self.entity_graph, self.parent.player, edge[1])
+                ):
                     del self.cached_edge_colors[edge]
 
     def remove_line_from(self, entity_a: Entity, entity_b: Entity):

@@ -37,6 +37,10 @@ class Asteroid(Entity):
                     or entity_b not in self.manager.entity_graph
                 )
             ):
-                self.manager.add_line_between(entity_a, entity_b)
+                if (
+                    self.manager.parent.player in self.manager.entity_graph
+                    and self.manager.parent.player.gameplay_settings.GRAPHGROW
+                ):
+                    self.manager.add_line_between(entity_a, entity_b)
 
         return True

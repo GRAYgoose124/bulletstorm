@@ -1,7 +1,7 @@
 from ...entity.base import Entity
 
 from .settings import PlayerSettings
-from ...entities.actions.attacks import shoot, shockline
+from .attacks import shoot, shockline
 
 
 class Player(Entity):
@@ -75,6 +75,7 @@ class Player(Entity):
                     neighbors = self.manager.entity_graph.adj[self]
                     if neighbors:
                         self.manager.remove_line_from(self, next(iter(neighbors)))
+                        self.manager.remove_entity_from_graph(self)
         elif key == self.keybinds.SPLIT:
             if not release:
                 # follow the lines from the player and split from the first node that is not the player
@@ -83,9 +84,10 @@ class Player(Entity):
                     if neighbors:
                         for n in list(neighbors):
                             self.manager.remove_entity_from_graph(n)
-                else:
-                    # remove constraints just in case
-                    self.manager.remove_constraints(self)
+                    self.manager.remove_entity_from_graph(self)
+        elif key == self.keybinds.GRAPHGROW:
+            if release:
+                self.gameplay_settings.GRAPHGROW = not self.gameplay_settings.GRAPHGROW
 
     def reset(self):
         self.angle = 0

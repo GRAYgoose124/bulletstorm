@@ -63,7 +63,10 @@ class SpaceLevel:
         self.manager._generate_worldspace_bounds()
         self._update_asteroids()
 
-        Catcher.add_to_manager(self.manager, self.manager.get_worldspace_center())
+        for _ in range(10):
+            p = self.manager.get_worldspace_center()
+            p = (p[0] + random.uniform(-200, 200), p[1] + random.uniform(-200, 200))
+            Catcher.add_to_manager(self.manager, center=p)
 
     def resize(self, width, height):
         self.size = (width, height)
@@ -132,23 +135,31 @@ class SpaceLevel:
             # Create the asteroid
             asset = random.choice(asteroid_list)
             asteroid = Asteroid(asset, 0.5, center_x=rx, center_y=ry)
-            asteroid.velocity = [random.uniform(-1, 1), random.uniform(-1, 1)]
 
             if "tiny" in asset:
                 m = 0.3 + random.uniform(-0.2, 0.2)
+                velocity = [random.uniform(-8, 8), random.uniform(-8, 8)]
             elif "small" in asset:
                 m = 0.7 + random.uniform(-0.2, 0.2)
+                velocity = [random.uniform(-4, 4), random.uniform(-4, 4)]
             elif "med" in asset:
                 m = 1.5 + random.uniform(-0.2, 0.2)
+                velocity = [random.uniform(-2, 2), random.uniform(-2, 2)]
             elif "big" in asset:
                 m = 3.3 + random.uniform(-0.2, 0.2)
-            asteroid.hp = m * 5
+                velocity = [random.uniform(-1, 1), random.uniform(-1, 1)]
 
             self.manager.add_entity(
                 asteroid,
                 tag="asteroid",
                 mass=m,
             )
+
+            asteroid.hp = m * 5
+            body = self.manager.get_physics_object(asteroid).body
+            body.velocity = velocity
+            body.angular_velocity = random.uniform(-1, 1)
+            body.friction = 0.0
 
     def _update_asteroids(self):
         # move all the asteroids

@@ -9,6 +9,7 @@ class Projectile(Entity):
         super().__init__(resource, *args, **kwargs)
 
     def collision_handler(self, entity_a, entity_b, arbiter, space, data):
+        # remove projectile
         self.manager.remove_entity(entity_a)
 
         # damage sprite_b

@@ -18,6 +18,8 @@ class PlayerConfig(dict):
 
     SHOCKLINE_DEPTH: int = 3
 
+    GRAPHGROW: bool = True
+
 
 @dataclass
 class PlayerKeybinds(dict):
@@ -30,6 +32,7 @@ class PlayerKeybinds(dict):
     SHOCKLINE: int = arcade.key.V
     DISCONNECT: int = arcade.key.B
     SPLIT: int = arcade.key.G
+    GRAPHGROW: int = arcade.key.H
 
     PAUSE_MENU: int = arcade.key.ESCAPE
 
