@@ -91,8 +91,6 @@ class SpaceGameView(GuiView, ShaderViewMixin):
 
     def on_resize(self, width: int, height: int):
         self.level.resize(width, height)
-        self.camera_sprites.resize(int(width), int(height))
-        self.camera_gui.resize(int(width), int(height))
         super().on_resize(width, height)
 
     def on_key_press(self, key, modifiers):

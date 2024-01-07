@@ -73,6 +73,11 @@ class GuiView(arcade.View):
 
             imgui.end_frame()
 
+    def on_resize(self, width, height):
+        self.camera_sprites.resize(width, height)
+        self.camera_gui.resize(width, height)
+        return super().on_resize(width, height)
+
     def on_update(self, delta_time: float):
         if self.clicked_quit:
             self.on_quit()
@@ -121,6 +126,11 @@ class GuiView(arcade.View):
 
     def _widget_draw(self):
         for widget in self.widgets:
+            imgui.set_next_window_size(*widget.size[0], imgui.ONCE)
+            imgui.set_next_window_position(
+                *self.rel_to_window(*widget.size[1], widget_size=widget.size[0]),
+                imgui.ALWAYS
+            )
             widget.draw()
 
     def update(self, delta_time):

@@ -66,3 +66,6 @@ class BulletStorm(arcade.Window):
 
     def on_update(self, delta_time: float):
         return super().on_update(delta_time)
+
+    def on_resize(self, width: int, height: int):
+        return super().on_resize(width, height)

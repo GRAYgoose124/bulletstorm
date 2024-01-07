@@ -10,13 +10,9 @@ class ShipUiWidget(Widget):
 
         self.button_message = ""
 
-    def draw(self):
-        widget_size = self.page.percent_of(0.25, 0.25)
-        imgui.set_next_window_size(*widget_size, imgui.ONCE)
-        imgui.set_next_window_position(
-            *self.page.rel_to_window(-32, -32, widget_size=widget_size), imgui.ONCE
-        )
+        self.size = (256, 128), (-308, -32)
 
+    def draw(self):
         with imgui.begin("Ship UI"):
             if imgui.button("Fire Missile"):
                 self.button_message = "You fired a missile!"

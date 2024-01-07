@@ -39,6 +39,8 @@ class BattleCoreWidget(Widget):
 
         self._start_battle(init_battle())
 
+        self.size = (256, 128), (-32, -32)
+
     def _start_battle(self, battle):
         self.battle_engine.battle = battle
         self.battle_engine._next_turn()
@@ -70,12 +72,6 @@ class BattleCoreWidget(Widget):
         return output
 
     def draw(self):
-        widget_size = self.page.percent_of(0.25, 0.25)
-        imgui.set_next_window_size(*widget_size, imgui.ONCE)
-        imgui.set_next_window_position(
-            *self.page.rel_to_window(512, 512, widget_size=widget_size), imgui.ONCE
-        )
-
         with imgui.begin("Battle UI"):
             if not self.battle_engine.battle.is_over:
                 imgui.text(self.last_output)
