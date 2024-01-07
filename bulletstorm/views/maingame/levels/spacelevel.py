@@ -8,6 +8,41 @@ from ..entities.player import Player
 from ..entities.asteroid import Asteroid
 from ..entities.simpleagent import Catcher
 
+from numba import jit
+import random
+
+
+from numba import jit
+import random
+
+
+@jit(nopython=True)
+def place_asteroids(n, n_dist, max_tries, worldspace_dims):
+    placed = []
+    for _ in range(n):
+        rx, ry = 0, 0
+        tries = 0
+        while tries < max_tries:
+            rx = random.randint(0, worldspace_dims[0])
+            ry = random.randint(0, worldspace_dims[1])
+
+            valid_placement = True
+            min_dist = worldspace_dims[0] // n_dist
+            for x, y in placed:
+                if ((rx - x) ** 2 + (ry - y) ** 2) ** 0.5 <= min_dist:
+                    valid_placement = False
+                    break
+
+            if valid_placement:
+                break
+            else:
+                tries += 1
+
+        if valid_placement:
+            placed.append((rx, ry))
+
+    return placed
+
 
 class SpaceLevel:
     def __init__(self, parent):
@@ -89,29 +124,11 @@ class SpaceLevel:
         ]
 
         # Randomly generate the asteroids
-        placed = [(self.player.center_x, self.player.center_y)]
         n = 600
         n_dist = n * 10
         max_tries = n // 2
-        for _ in range(n):
-            # Try to place the asteroid at a random location
-            rx, ry = 0, 0
-            tries = 0
-            while (
-                not all(
-                    [
-                        ((rx - x) ** 2 + (ry - y) ** 2) ** 0.5
-                        > (self.manager.worldspace_dims[0] // n_dist)
-                        for x, y in placed
-                    ]
-                )
-                and tries < max_tries
-            ):
-                rx, ry = random.randint(
-                    0, self.manager.worldspace_dims[0]
-                ), random.randint(0, self.manager.worldspace_dims[1])
-                tries += 1
-
+        placed = place_asteroids(n, n_dist, max_tries, self.manager.worldspace_dims)
+        for rx, ry in placed:
             # Create the asteroid
             asset = random.choice(asteroid_list)
             asteroid = Asteroid(asset, 0.5, center_x=rx, center_y=ry)
@@ -132,8 +149,6 @@ class SpaceLevel:
                 tag="asteroid",
                 mass=m,
             )
-
-            placed.append((rx, ry))
 
     def _update_asteroids(self):
         # move all the asteroids

@@ -12,6 +12,7 @@ arcade-imgui = { git = "https://github.com/kfields/arcade-imgui", python = ">=3.
 networkx = "^3.2.1"
 numpy = "^1.26.2"
 imgui = "^2.0.0"
+numba = "^0.58.1"
 
 [build-system]
 requires = ["poetry-core"]
