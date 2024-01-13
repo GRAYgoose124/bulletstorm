@@ -2,7 +2,7 @@ import time
 import arcade
 import imgui
 
-from ...gui.guiview import GuiView
+from ..gui.view import GuiView
 
 from .widgets.spacebattle import ShipUiWidget
 from .widgets.battlecore import BattleCoreWidget
@@ -24,6 +24,8 @@ class SpaceGameView(GuiView, ShaderViewMixin):
         self._restart = False
 
         self.player = None
+        self.player_controls_str = ""
+
         self.level = None
 
         self.add_widget(ShipUiWidget)
@@ -35,6 +37,9 @@ class SpaceGameView(GuiView, ShaderViewMixin):
         self._restart = False
         self.level = SpaceLevel(self)
         self.player = self.level.player
+        self.player_controls_str = "\n".join(
+            f"{control}: {key}" for control, key in self.player.keybinds
+        )
 
     def end_game(self):
         self._game_over = time.time()
@@ -62,7 +67,7 @@ class SpaceGameView(GuiView, ShaderViewMixin):
         imgui.set_next_window_size(*widget_size, imgui.ONCE)
 
         with imgui.begin("Controls"):
-            imgui.text("V - shockline\nSPACE - fire\n\nESC - pause\n")
+            imgui.text(self.player_controls_str)
 
     def game_draw(self):
         player_center = (

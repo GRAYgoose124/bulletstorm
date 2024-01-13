@@ -4,7 +4,7 @@ import arcade
 
 
 @dataclass
-class PlayerConfig(dict):
+class PlayerConfig:
     FORWARD_ACCELERATION: float = 4
     LATERAL_ACCELERATION: float = 1
     TURN_VELOCITY: float = 0.05
@@ -21,8 +21,17 @@ class PlayerConfig(dict):
     GRAPHGROW: bool = True
 
 
+def arcade_key_map(v, no_mods=True):
+    for k, v2 in filter(
+        lambda e: not e[0].startswith("_") and not e[0].startswith("MOD_"),
+        arcade.key.__dict__.items(),
+    ):
+        if v == v2:
+            return k
+
+
 @dataclass
-class PlayerKeybinds(dict):
+class PlayerKeybinds:
     MOVE_FORWARD: int = arcade.key.W
     MOVE_BACKWARD: int = arcade.key.S
     TURN_LEFT: int = arcade.key.A
@@ -35,6 +44,13 @@ class PlayerKeybinds(dict):
     GRAPHGROW: int = arcade.key.H
 
     PAUSE_MENU: int = arcade.key.ESCAPE
+
+    def __iter__(self):
+        # map control codes to their names (MOVE_FORWARD, int) -> (MOVE_FORWARD, "W")
+        for control, code in filter(
+            lambda e: not e[0].startswith("_"), self.__dict__.items()
+        ):
+            yield control, arcade_key_map(code)
 
 
 class PlayerSettings(dict):

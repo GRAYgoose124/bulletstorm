@@ -2,7 +2,7 @@ import arcade
 import arcade.gui
 import logging
 
-from ..gui.guiview import GuiView
+from .gui.view import GuiView
 
 logger = logging.getLogger(__name__)
 
