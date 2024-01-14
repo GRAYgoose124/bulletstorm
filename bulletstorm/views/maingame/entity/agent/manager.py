@@ -26,6 +26,10 @@ class AgentManager(EntityManager, GraphLineMixin):
         else:
             self.agent_update_timer -= delta_time
 
+    def draw(self):
+        self.graph_line_list.draw()
+        super().draw()
+
     def remove_entity(self, entity: Entity, *args, **kwargs):
         try:
             super().remove_entity(entity, *args, **kwargs)

@@ -55,7 +55,9 @@ class SpaceLevel:
     def setup(self):
         self.manager = AgentManager(self.parent)
 
-        self.__spawn_player()
+        if self.player is None:
+            self.__spawn_player()
+
         self.__generate_asteroids()
         self.manager._generate_worldspace_bounds()
         self._update_asteroids()

@@ -94,7 +94,6 @@ class EntityManager(arcade.PymunkPhysicsEngine, ManagerWorldspaceMixin):
         super().step(delta_time)
 
     def draw(self):
-        self.graph_line_list.draw()
         self.entities.draw()
         self.explosions_list.draw()
 

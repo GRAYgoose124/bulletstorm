@@ -3,22 +3,19 @@ import arcade
 import imgui
 
 from ..gui.view import GuiView
+from ..gui.shader import ShaderViewMixin
 
 from .widgets.spacebattle import ShipUiWidget
 from .widgets.battlecore import BattleCoreWidget
 
 from .particles.gpu_explosion import GpuBurst
 from .levels.spacelevel.level import SpaceLevel
-from .shader import ShaderViewMixin
 
 
 class SpaceGameView(GuiView, ShaderViewMixin):
     def __init__(self, window, name="primary", title="Primary"):
         super().__init__(window, name, title)
         ShaderViewMixin.__init__(self)
-        # also add the shaders
-
-        self.add_shader(GpuBurst)
 
         self._game_over = False
         self._restart = False
@@ -27,6 +24,8 @@ class SpaceGameView(GuiView, ShaderViewMixin):
         self.player_controls_str = ""
 
         self.level = None
+
+        self.add_shader(GpuBurst)
 
         self.add_widget(ShipUiWidget)
         self.add_widget(BattleCoreWidget)
@@ -62,7 +61,7 @@ class SpaceGameView(GuiView, ShaderViewMixin):
     def draw_sidebar(self):
         pos = 16, 32
         imgui.set_next_window_position(*pos, imgui.ONCE)
-        widget_size = self.percent_of(0.25, 1.0)
+        widget_size = self.percent_of(0.15, 0.33)
         widget_size = widget_size[0] - 2 * pos[0], widget_size[1] - 2 * pos[1]
         imgui.set_next_window_size(*widget_size, imgui.ONCE)
 
