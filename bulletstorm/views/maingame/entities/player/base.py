@@ -1,13 +1,12 @@
 from ...entity.base import Entity
 
-from .settings import PlayerSettings
 from .attacks import shoot, shockline
 
 
 class Player(Entity):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, settings, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._settings = PlayerSettings()
+        self._settings = settings
         self.hp = self.gameplay_settings.MAX_HP
 
     @property

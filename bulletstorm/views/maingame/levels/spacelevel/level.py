@@ -1,19 +1,16 @@
 import random
 from pathlib import Path
-
-from ..entity.agent.manager import AgentManager
-from ..entity.manager import EntityAlreadyRemovedError
-
-from ..entities.player import Player
-from ..entities.asteroid import Asteroid
-from ..entities.simpleagent import Catcher
-
 from numba import jit
-import random
 
 
-from numba import jit
-import random
+from ...entity.agent.manager import AgentManager
+from ...entity.manager import EntityAlreadyRemovedError
+
+from ...entities.player import Player
+from ...entities.asteroid import Asteroid
+from ...entities.simpleagent import Catcher
+
+from .settings import SpaceGamePlayerSettings
 
 
 @jit(nopython=True)
@@ -85,10 +82,15 @@ class SpaceLevel:
         # ship sheet has two sprites side by side
         # TODO move into player class and preserve game player
         root = (
-            Path(__file__).parents[4] / "assets" / "topdown-scifi" / "asteroid-fighter"
+            Path(__file__).parents[5] / "assets" / "topdown-scifi" / "asteroid-fighter"
         )
         self.player = Player(
-            root / "ship.png", image_x=0, image_y=0, image_width=48, image_height=48
+            SpaceGamePlayerSettings,
+            root / "ship.png",
+            image_x=0,
+            image_y=0,
+            image_width=48,
+            image_height=48,
         )
 
         # Set the player in the center of screen / not worldspace

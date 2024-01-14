@@ -8,7 +8,7 @@ from .widgets.spacebattle import ShipUiWidget
 from .widgets.battlecore import BattleCoreWidget
 
 from .particles.gpu_explosion import GpuBurst
-from .levels.spacelevel import SpaceLevel
+from .levels.spacelevel.level import SpaceLevel
 from .shader import ShaderViewMixin
 
 
