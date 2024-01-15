@@ -65,7 +65,7 @@ class PauseView(arcade.View):
 
         def restart_on_click(_):
             self.window.show_view("primary")
-            self.window.pages["primary"].setup()
+            self.window.pages["primary"].restart_game()
 
         restart_button = arcade.gui.UIFlatButton(text="Restart", width=200, height=50)
         restart_button.on_click = restart_on_click

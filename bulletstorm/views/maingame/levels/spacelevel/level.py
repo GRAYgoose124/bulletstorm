@@ -2,6 +2,7 @@ import random
 from pathlib import Path
 from numba import jit
 
+from ...levels.base import LevelBase
 
 from ...entity.agent.manager import AgentManager
 from ...entity.manager import EntityAlreadyRemovedError
@@ -41,22 +42,14 @@ def place_asteroids(n, n_dist, max_tries, worldspace_dims):
     return placed
 
 
-class SpaceLevel:
+class SpaceLevel(LevelBase):
     def __init__(self, parent):
-        self.parent = parent
-
-        self._player = parent.player
-        self.manager = None
-
-        self.size = None
-        self.resize(*parent.window.get_size())
-        self.setup()
+        LevelBase.__init__(self, parent)
 
     def setup(self):
         self.manager = AgentManager(self.parent)
 
-        if self.player is None:
-            self.__spawn_player()
+        self.__spawn_player()
 
         self.__generate_asteroids()
         self.manager._generate_worldspace_bounds()
@@ -66,19 +59,6 @@ class SpaceLevel:
             p = self.manager.get_worldspace_center()
             p = (p[0] + random.uniform(-200, 200), p[1] + random.uniform(-200, 200))
             Catcher.add_to_manager(self.manager, center=p)
-
-    def resize(self, width, height):
-        self.size = (width, height)
-        # self.setup()
-
-    @property
-    def player(self):
-        return self._player
-
-    @player.setter
-    def player(self, value):
-        self._player = value
-        self.parent.player = value
 
     def __spawn_player(self, position: tuple[int, int] = None, mass=1.0):
         # ship sheet has two sprites side by side
@@ -165,6 +145,10 @@ class SpaceLevel:
             body.angular_velocity = random.uniform(-1, 1)
             body.friction = 0.0
 
+    def update_level(self, delta_time):
+        # self._update_asteroids()
+        pass
+
     def _update_asteroids(self):
         # move all the asteroids
         for asteroid in self.manager.by_tag("asteroid"):
@@ -176,16 +160,3 @@ class SpaceLevel:
             force = [random.uniform(-100, 100), random.uniform(-100, 100)]
 
             self.manager.apply_force(asteroid, force)
-
-    def update(self, delta_time: float):
-        # self._update_asteroids()
-
-        # run the physics update
-        self.manager.step(delta_time)
-
-        # check if player is dead
-        if self.player.hp <= 0:
-            self.parent.end_game()
-
-    def draw(self):
-        self.manager.draw()

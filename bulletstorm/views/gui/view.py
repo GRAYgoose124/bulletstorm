@@ -25,6 +25,9 @@
 import arcade
 import imgui
 import imgui.core
+import logging
+
+log = logging.getLogger(__name__)
 
 
 class GuiView(arcade.View):
@@ -59,7 +62,7 @@ class GuiView(arcade.View):
     def on_draw(self):
         arcade.start_render()
         self.camera_sprites.use()
-        self.game_draw()
+        self.draw_game()
 
         self.camera_gui.use()
         if self.show_gui:
@@ -69,7 +72,7 @@ class GuiView(arcade.View):
             self.draw_sidebar()
 
             self._widget_draw()
-            self.gui_draw()
+            self.draw_gui()
 
             imgui.end_frame()
 
@@ -92,9 +95,15 @@ class GuiView(arcade.View):
 
     def on_hide_view(self):
         self.show_gui = False
-        imgui.new_frame()
-        imgui.end_frame()
-        return super().on_hide_view()
+        try:
+            imgui.new_frame()
+            imgui.end_frame()
+            return super().on_hide_view()
+        except imgui.core.ImGuiError:
+            log.warning("imgui error on hide view")
+
+    def update(self, delta_time):
+        pass
 
     def draw_sidebar(self):
         pass
@@ -118,10 +127,10 @@ class GuiView(arcade.View):
 
             imgui.end_main_menu_bar()
 
-    def game_draw(self):
+    def draw_game(self):
         pass
 
-    def gui_draw(self):
+    def draw_gui(self):
         pass
 
     def _widget_draw(self):
@@ -129,12 +138,9 @@ class GuiView(arcade.View):
             imgui.set_next_window_size(*widget.size[0], imgui.ONCE)
             imgui.set_next_window_position(
                 *self.rel_to_window(*widget.size[1], widget_size=widget.size[0]),
-                imgui.ALWAYS
+                widget.draw_mode
             )
             widget.draw()
-
-    def update(self, delta_time):
-        pass
 
     # widget helpers
     def rel_to_mouse(self, x, y):

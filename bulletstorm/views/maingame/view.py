@@ -1,62 +1,40 @@
-import time
-import arcade
-import imgui
+import time, arcade, imgui, logging
 
 from ..gui.view import GuiView
 from ..gui.shader import ShaderViewMixin
 
 from .widgets.spacebattle import ShipUiWidget
 from .widgets.battlecore import BattleCoreWidget
+from .widgets.debug_lvl_select import DebugLevelSelect
 
 from .particles.gpu_explosion import GpuBurst
 from .levels.spacelevel.level import SpaceLevel
+from .levels.view_mixin import LevelViewMixin
+
+log = logging.getLogger(__name__)
 
 
-class SpaceGameView(GuiView, ShaderViewMixin):
+class SpaceGameView(GuiView, ShaderViewMixin, LevelViewMixin):
     def __init__(self, window, name="primary", title="Primary"):
         super().__init__(window, name, title)
         ShaderViewMixin.__init__(self)
-
-        self._game_over = False
-        self._restart = False
-
-        self.player = None
-        self.player_controls_str = ""
-
-        self.level = None
+        LevelViewMixin.__init__(self)
 
         self.add_shader(GpuBurst)
 
         self.add_widget(ShipUiWidget)
         self.add_widget(BattleCoreWidget)
-        self.setup()
+        self.add_widget(DebugLevelSelect)
 
-    def setup(self):
-        self._game_over = False
-        self._restart = False
-        self.level = SpaceLevel(self)
-        self.player = self.level.player
-        self.player_controls_str = "\n".join(
-            f"{control}: {key}" for control, key in self.player.keybinds
-        )
+        self.select_level(SpaceLevel)
 
     def end_game(self):
-        self._game_over = time.time()
+        LevelViewMixin.end_game(self)
         self.window.show_view("game_over")
 
-    def restart_game(self):
-        self.end_game()
-        self._restart = True
-        self.setup()
-
-        self.window.show_view("primary")
-
-    def on_show(self):
-        arcade.set_background_color(arcade.color.BLACK)
-
         if self._restart:
-            self.level.setup(*self.window.get_size())
-            self._restart = False
+            self.init_level()
+            self.window.show_view("primary")
 
     def draw_sidebar(self):
         pos = 16, 32
@@ -68,7 +46,7 @@ class SpaceGameView(GuiView, ShaderViewMixin):
         with imgui.begin("Controls"):
             imgui.text(self.player_controls_str)
 
-    def game_draw(self):
+    def draw_game(self):
         player_center = (
             self.player.center_x - self.window.width / 2,
             self.player.center_y - self.window.height / 2,
@@ -78,20 +56,23 @@ class SpaceGameView(GuiView, ShaderViewMixin):
         for shader in self.shaders.values():
             shader.draw()
 
-    def gui_draw(self):
+    def draw_gui(self):
         """Page method"""
         pass
 
+    def update(self, delta_time: float):
+        ShaderViewMixin.update(self, delta_time)
+        LevelViewMixin.update(self, delta_time)
+
+    def on_show(self):
+        arcade.set_background_color(arcade.color.BLACK)
+
+        if self._restart:
+            self.level.setup(*self.window.get_size())
+            self._restart = False
+
     def on_quit(self):
         self.window.close()
-
-    def update(self, delta_time: float):
-        for shader in self.shaders.values():
-            shader.update(delta_time)
-        self.level.update(delta_time)
-
-    def on_hide_view(self):
-        return super().on_hide_view()
 
     def on_resize(self, width: int, height: int):
         self.level.resize(width, height)
