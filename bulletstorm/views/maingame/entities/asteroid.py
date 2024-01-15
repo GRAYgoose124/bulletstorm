@@ -5,22 +5,20 @@ log = setup_logging(__name__)
 
 
 class Asteroid(Entity):
+    def post_solve(self, entity_a, entity_b, arbiter, space, data):
+        if any([entity_a.tag == "player", entity_b.tag == "player"]):
+            print("collision between %s and %s" % (entity_a, entity_b))
+            target = entity_a.manager.parent.player
+        else:
+            return True
+
+        impact_vel = arbiter.total_impulse.length
+        if impact_vel > 0:
+            target.take_damage(10 * impact_vel, cooldown=0)
+            log.debug("asteroid hit player for %s damage", 10 * impact_vel)
+
     def collision_handler(self, entity_a, entity_b, arbiter, space, data):
         # log.debug("collision between %s and %s", entity_a, entity_b)
-        # damage player
-        # if any([entity_a.tag == "player", entity_b.tag == "player"]):
-        #     print("collision between %s and %s" % (entity_a, entity_b))
-        # if entity_b.tag == "player":
-        #     target = entity_b
-        # elif entity_a.tag == "player":
-        #     target = entity_a
-        # else:
-        #     target = None
-
-        # if target is not None:
-        #     impact_vel = arbiter.total_impulse.length
-        #     target.take_damage(10 * impact_vel, cooldown=0)
-
         # if either entity has a line, connect a new one with manager - shockline op todo: upgrade for it
         if entity_a.tag == "asteroid" and entity_b.tag == "asteroid":
             if (

@@ -6,7 +6,7 @@ class LevelBase:
         self.manager = None
 
         self.size = None
-        self.resize(*parent.window.get_size())
+        self.resize(*self.parent.window.get_size())
         self.setup()
 
     @property

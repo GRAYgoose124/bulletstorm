@@ -1,6 +1,10 @@
+from .....log import setup_logging
 from ...entity.base import Entity
 
+from ..asteroid import Asteroid
 from .attacks import shoot, shockline
+
+log = setup_logging(__name__)
 
 
 class Player(Entity):
@@ -40,9 +44,11 @@ class Player(Entity):
         body.angular_velocity *= self.gameplay_settings.DRAG
         self.manager.apply_impulse(self, self.acceleration)
 
+    def post_solve(self, entity_a, entity_b, arbiter, space, data):
+        Asteroid.post_solve(self, entity_a, entity_b, arbiter, space, data)
+
     def collision_handler(self, sprite_a, sprite_b, arbiter, space, data):
         if sprite_b is not None and sprite_a is not None:
-            # do self damage if we hit an asteroid
             self.take_damage(1, cooldown=0)
         return True
 

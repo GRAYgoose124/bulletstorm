@@ -32,6 +32,9 @@ class Entity(arcade.Sprite):
     def collision_handler(self, sprite_a, sprite_b, arbiter, space, data):
         return True
 
+    def post_solve(self, arbiter, space, data):
+        pass
+
     def update(self, delta_time):
         if self.cooldown > 0:
             self.cooldown -= delta_time

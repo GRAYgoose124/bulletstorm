@@ -112,7 +112,12 @@ class EntityManager(arcade.PymunkPhysicsEngine, ManagerWorldspaceMixin):
 
         # also register the self collision handler TODO: it's own method
         if collide_with_own_type:
-            self.add_collision_handler(entity.tag, entity.tag, entity.collision_handler)
+            self.add_collision_handler(
+                entity.tag,
+                entity.tag,
+                entity.collision_handler,
+                post_handler=entity.post_solve,
+            )
 
         if collision_handlers is not None:
             for collision_type, collision_handler in collision_handlers.items():

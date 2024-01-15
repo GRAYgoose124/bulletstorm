@@ -1,7 +1,7 @@
 import time, arcade, imgui, logging
 
-from ..gui.view import GuiView
-from ..gui.shader import ShaderViewMixin
+from ...guiview import GuiView
+from .particles.shaders.view_mixin import ShaderViewMixin
 
 from .widgets.spacebattle import ShipUiWidget
 from .widgets.battlecore import BattleCoreWidget

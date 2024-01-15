@@ -5,7 +5,7 @@ from bulletstorm.log import setup_logging
 
 
 def main():
-    setup_logging()
+    setup_logging(__name__)
 
     app = BulletStorm()
 
