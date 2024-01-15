@@ -1,8 +1,12 @@
-from dataclasses import dataclass
-
 import arcade
 
-from ...entities.player.settings import PlayerSettings, PlayerKeybinds, PlayerConfig
+from dataclasses import dataclass
+
+from .....core.entity.player.settings import (
+    PlayerConfig,
+    PlayerKeybinds,
+    PlayerSettings,
+)
 
 
 @dataclass

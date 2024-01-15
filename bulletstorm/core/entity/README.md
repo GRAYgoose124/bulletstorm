@@ -2,7 +2,7 @@
 
 ## Entity
 
-An entity is a game which represents a physical object in the game world. It has a position, a velocity, and a sprite. It can be collided with, and it can collide with other entities. 
+An entity is a game object which represents a physical object in the game world. It has a position, a velocity, and a sprite. It can be collided with, and it can collide with other entities. 
 
 ## Agent
 

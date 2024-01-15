@@ -2,8 +2,10 @@ from pathlib import Path
 import arcade
 import numpy as np
 
+from ....core.shader.program import ShaderProgram
 
-class LineShaderProgram:
+
+class LineShaderProgram(ShaderProgram):
     VERT = Path(__file__).parent / "shaders" / "line_vert.glsl"
     FRAG = Path(__file__).parent / "shaders" / "line_frag.glsl"
 

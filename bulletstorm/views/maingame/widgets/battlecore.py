@@ -1,6 +1,6 @@
 import imgui
 
-from .base import Widget
+from ....core.gui.widget import Widget
 
 from ..battlecore.core import *
 from ..battlecore.battlegame.actors import *

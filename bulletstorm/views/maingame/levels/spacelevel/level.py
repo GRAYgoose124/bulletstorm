@@ -2,12 +2,12 @@ import random
 from pathlib import Path
 from numba import jit
 
-from ...levels.base import LevelBase
+from .....core.level.base import LevelBase
 
-from ...entity.agent.manager import AgentManager
-from ...entity.manager import EntityAlreadyRemovedError
+from .....core.entity.agent.manager import AgentManager
+from .....core.entity.manager import EntityAlreadyRemovedError
 
-from ...entities.player import Player
+from ...entities.player.player import SpacePlayer
 from ...entities.asteroid import Asteroid
 from ...entities.simpleagent import Catcher
 
@@ -66,7 +66,7 @@ class SpaceLevel(LevelBase):
         root = (
             Path(__file__).parents[5] / "assets" / "topdown-scifi" / "asteroid-fighter"
         )
-        self.player = Player(
+        self.player = SpacePlayer(
             SpaceGamePlayerSettings,
             root / "ship.png",
             image_x=0,

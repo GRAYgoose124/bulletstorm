@@ -1,8 +1,6 @@
-from .....log import setup_logging
+from ...utils import setup_logging
 from ...entity.base import Entity
 
-from ..asteroid import Asteroid
-from .attacks import shoot, shockline
 
 log = setup_logging(__name__)
 
@@ -45,7 +43,7 @@ class Player(Entity):
         self.manager.apply_impulse(self, self.acceleration)
 
     def post_solve(self, entity_a, entity_b, arbiter, space, data):
-        Asteroid.post_solve(self, entity_a, entity_b, arbiter, space, data)
+        pass
 
     def collision_handler(self, sprite_a, sprite_b, arbiter, space, data):
         if sprite_b is not None and sprite_a is not None:
@@ -65,34 +63,6 @@ class Player(Entity):
             self.change_angle = 0 if release else self.gameplay_settings.TURN_VELOCITY
         elif key == self.keybinds.TURN_RIGHT:
             self.change_angle = 0 if release else -self.gameplay_settings.TURN_VELOCITY
-        # actions
-        elif key == self.keybinds.SHOOT:
-            # self.is_firing = not release
-            if not release:
-                shoot(self, target_tag="enemy")
-        elif key == self.keybinds.SHOCKLINE:
-            if not release:
-                shockline(self)
-        elif key == self.keybinds.DISCONNECT:
-            if not release:
-                # disconnect one line from the player
-                if self.manager.has_line(self):
-                    neighbors = self.manager.entity_graph.adj[self]
-                    if neighbors:
-                        self.manager.remove_line_from(self, next(iter(neighbors)))
-                        self.manager.remove_entity_from_graph(self)
-        elif key == self.keybinds.SPLIT:
-            if not release:
-                # follow the lines from the player and split from the first node that is not the player
-                if self.manager.has_line(self):
-                    neighbors = self.manager.entity_graph.adj[self]
-                    if neighbors:
-                        for n in list(neighbors):
-                            self.manager.remove_entity_from_graph(n)
-                    self.manager.remove_entity_from_graph(self)
-        elif key == self.keybinds.GRAPHGROW:
-            if release:
-                self.gameplay_settings.GRAPHGROW = not self.gameplay_settings.GRAPHGROW
 
     def reset(self):
         self.angle = 0

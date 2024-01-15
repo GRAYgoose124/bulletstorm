@@ -1,7 +1,7 @@
 import imgui
 import imgui.core
 
-from .base import Widget
+from ....core.gui.widget import Widget
 
 
 class ShipUiWidget(Widget):

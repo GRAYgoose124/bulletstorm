@@ -1,7 +1,7 @@
 from pymunk import Vec2d
 
-from bulletstorm.views.maingame.entity.base import Entity
-from ..entity.agent.core import AgentForce, AgentSpec, AgentCollisionHandler
+from ....core.entity.base import Entity
+from ....core.entity.agent.core import AgentForce, AgentSpec, AgentCollisionHandler
 from .asteroid import Asteroid
 
 

@@ -1,4 +1,4 @@
-from ..entity.base import Entity
+from ....core.entity.base import Entity
 
 
 # TODO: should be a particle, follow explosion's lead.

@@ -1,15 +1,16 @@
 import time, arcade, imgui, logging
 
-from ...guiview import GuiView
-from .particles.shaders.view_mixin import ShaderViewMixin
+from ...core.gui.view import GuiView
+from ...core.shader.view_mixin import ShaderViewMixin
+from ...core.level.view_mixin import LevelViewMixin
+
+from .particles.gpu_explosion import GpuBurst
 
 from .widgets.spacebattle import ShipUiWidget
 from .widgets.battlecore import BattleCoreWidget
 from .widgets.debug_lvl_select import DebugLevelSelect
 
-from .particles.gpu_explosion import GpuBurst
 from .levels.spacelevel.level import SpaceLevel
-from .levels.view_mixin import LevelViewMixin
 
 log = logging.getLogger(__name__)
 

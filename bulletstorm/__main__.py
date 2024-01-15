@@ -1,7 +1,7 @@
 import arcade
 
-from bulletstorm.window import BulletStorm
-from bulletstorm.log import setup_logging
+from .window import BulletStorm
+from .core.utils import setup_logging
 
 
 def main():

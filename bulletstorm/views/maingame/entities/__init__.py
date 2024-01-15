@@ -1,8 +1,8 @@
 # Game Entities
-from .player import Player
+from .player.player import SpacePlayer
 from .asteroid import Asteroid
 from .simpleagent import Catcher
 
-spacegame_entities = ["Player", "Asteroid", "Catcher"]
+spacegame_entities = ["SpacePlayer", "Asteroid", "Catcher"]
 
 __all__ = [*spacegame_entities]

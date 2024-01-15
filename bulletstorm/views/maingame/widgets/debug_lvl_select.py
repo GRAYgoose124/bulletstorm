@@ -1,6 +1,6 @@
 import imgui, imgui.core, logging
 
-from .base import Widget
+from ....core.gui.widget import Widget
 from ..levels import all_levels
 
 log = logging.getLogger(__name__)
