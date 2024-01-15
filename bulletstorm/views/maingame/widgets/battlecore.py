@@ -2,8 +2,8 @@ import imgui
 
 from ....core.gui.widget import Widget
 
-from ..battlecore.core import *
-from ..battlecore.battlegame.actors import *
+from ....battle.core import *
+from ....battle.game.actors import *
 
 
 def make_player_party():

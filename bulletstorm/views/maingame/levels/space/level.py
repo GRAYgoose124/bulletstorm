@@ -42,23 +42,25 @@ def place_asteroids(n, n_dist, max_tries, worldspace_dims):
     return placed
 
 
+def spawn_catchers(level):
+    for _ in range(10):
+        p = level.manager.get_worldspace_center()
+        p = (p[0] + random.uniform(-200, 200), p[1] + random.uniform(-200, 200))
+        Catcher.add_to_manager(level.manager, center=p)
+
+
 class SpaceLevel(LevelBase):
     def __init__(self, parent):
         LevelBase.__init__(self, parent)
 
     def setup(self):
         self.manager = AgentManager(self.parent)
+        self.manager._generate_worldspace_bounds()
 
         self.__spawn_player()
-
         self.__generate_asteroids()
-        self.manager._generate_worldspace_bounds()
-        self._update_asteroids()
 
-        for _ in range(10):
-            p = self.manager.get_worldspace_center()
-            p = (p[0] + random.uniform(-200, 200), p[1] + random.uniform(-200, 200))
-            Catcher.add_to_manager(self.manager, center=p)
+        spawn_catchers(self)
 
     def __spawn_player(self, position: tuple[int, int] = None, mass=1.0):
         # ship sheet has two sprites side by side

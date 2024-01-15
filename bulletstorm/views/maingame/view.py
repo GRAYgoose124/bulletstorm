@@ -10,7 +10,7 @@ from .widgets.spacebattle import ShipUiWidget
 from .widgets.battlecore import BattleCoreWidget
 from .widgets.debug_lvl_select import DebugLevelSelect
 
-from .levels.spacelevel.level import SpaceLevel
+from .levels.space.level import SpaceLevel
 
 log = logging.getLogger(__name__)
 

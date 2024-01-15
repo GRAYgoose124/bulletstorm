@@ -1,8 +1,8 @@
 import logging
 
 from .core import *
-from .battlegame.actors.heroes import *
-from .battlegame.actors.enemies import *
+from .game.actors.heroes import *
+from .game.actors.enemies import *
 
 
 def main():

@@ -1,4 +1,4 @@
-from .spacelevel.level import SpaceLevel
+from .space.level import SpaceLevel
 
 all_levels = [SpaceLevel]
 
