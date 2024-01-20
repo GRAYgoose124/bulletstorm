@@ -14,6 +14,8 @@ from .widgets.debug_lvl_select import DebugLevelSelect
 
 from .levels.space.level import SpaceLevel
 
+from .effects.shadows import ShadowsShadertoy
+
 log = logging.getLogger(__name__)
 
 
@@ -32,9 +34,7 @@ class SpaceGameView(GuiView, ShaderViewMixin, LevelViewMixin):
 
         self.select_level(SpaceLevel)
         # self.shaders["VectorFieldShader"].set_entity_list(self.level.manager.entities)
-        self.load_shadertoy(
-            Path(__file__).parent / "effects/shaders/raycasted_shadow_frag.glsl"
-        )
+        self.load_shadertoy(ShadowsShadertoy)
 
     def end_game(self):
         LevelViewMixin.end_game(self)
@@ -56,11 +56,9 @@ class SpaceGameView(GuiView, ShaderViewMixin, LevelViewMixin):
 
     def draw_game(self):
         self.level.draw()
-        self.draw_shadertoy()
+        self.draw_shaders()
+        self.draw_shadertoys()
         self.player.draw()
-
-        for shader in self.shaders.values():
-            shader.draw()
 
     def draw_gui(self):
         """Page method"""
