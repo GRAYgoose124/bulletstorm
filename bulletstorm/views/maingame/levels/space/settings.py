@@ -39,6 +39,7 @@ class SGPlayerKeybinds(PlayerKeybinds):
     DISCONNECT: int = arcade.key.B
     SPLIT: int = arcade.key.G
     GRAPHGROW: int = arcade.key.H
+    GRAPHTIGHTEN: int = arcade.key.J
 
     PAUSE_MENU: int = arcade.key.ESCAPE
 

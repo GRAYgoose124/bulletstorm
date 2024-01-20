@@ -95,7 +95,7 @@ class EntityManager(arcade.PymunkPhysicsEngine, ManagerWorldspaceMixin):
 
     def draw(self):
         self.entities.draw()
-        self.explosions_list.draw()
+        # self.explosions_list.draw()
 
     def add_entity(
         self,

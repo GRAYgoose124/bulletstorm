@@ -9,9 +9,9 @@ class ShaderViewMixin:
         self.shaders = {}
 
         self.shadertoy = None
+        self.shadertoy_path = None
         self.channel0 = None
         self.channel1 = None
-        self.channel2 = None
 
     # shaders
     def add_shader(self, shader_cls):
@@ -56,14 +56,10 @@ class ShaderViewMixin:
         self.channel1 = self.shadertoy.ctx.framebuffer(
             color_attachments=[self.shadertoy.ctx.texture(window_size, components=4)]
         )
-        self.channel2 = self.shadertoy.ctx.framebuffer(
-            color_attachments=[self.shadertoy.ctx.texture(window_size, components=4)]
-        )
 
         # Assign the frame buffers to the channels
         self.shadertoy.channel_0 = self.channel0.color_attachments[0]
         self.shadertoy.channel_1 = self.channel1.color_attachments[0]
-        self.shadertoy.channel_2 = self.channel2.color_attachments[0]
 
         log.debug("Loaded shadertoy: %s", path)
 
@@ -73,11 +69,6 @@ class ShaderViewMixin:
         self.channel0.clear()
         # Draw the asteroids to occur in the channel 0 frame buffer
         self.level.manager.entities.draw()
-
-        self.channel1.use()
-        self.channel1.clear()
-        self.level.manager.entities.draw()
-
         # Select this window to draw on
         self.window.use()
         # Run the shader and render to the window
@@ -87,5 +78,5 @@ class ShaderViewMixin:
         )
 
         self.shadertoy.program["lightPosition"] = p
-        self.shadertoy.program["lightSize"] = 300
+        self.shadertoy.program["lightSize"] = self.window.get_size()[0] / 2
         self.shadertoy.render()

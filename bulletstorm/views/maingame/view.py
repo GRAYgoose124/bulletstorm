@@ -55,8 +55,10 @@ class SpaceGameView(GuiView, ShaderViewMixin, LevelViewMixin):
             imgui.text(self.player_controls_str)
 
     def draw_game(self):
-        self.draw_shadertoy()
         self.level.draw()
+        self.draw_shadertoy()
+        self.player.draw()
+
         for shader in self.shaders.values():
             shader.draw()
 

@@ -85,3 +85,21 @@ def shockline(player):
         if b != player:
             dmg = _shockline(player, b, player.manager.graph_distance_from(player, b))
             me(b)
+
+
+def tighten(player):
+    """tightens the graph around the player"""
+    if player not in player.manager.entity_graph:
+        return
+
+    # apply constricting force to all nodes
+    for node in player.manager.entity_graph.nodes:
+        if node == player:
+            continue
+
+        # get the vector from the player to the node
+        vec = np.array(node.position) - np.array(player.position)
+        # normalize it
+        vec = vec / np.linalg.norm(vec)
+        # apply force
+        player.manager.apply_force(node, (vec * 1000).tolist())

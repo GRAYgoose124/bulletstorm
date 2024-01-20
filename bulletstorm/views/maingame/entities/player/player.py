@@ -2,7 +2,7 @@ from .....core.entity.player import Player
 from .....core.utils import setup_logging
 
 from ..asteroid import Asteroid
-from .attacks import shoot, shockline
+from .attacks import shoot, shockline, tighten
 
 log = setup_logging(__name__)
 
@@ -45,3 +45,6 @@ class SpacePlayer(Player):
         elif key == self.keybinds.GRAPHGROW:
             if release:
                 self.gameplay_settings.GRAPHGROW = not self.gameplay_settings.GRAPHGROW
+        elif key == self.keybinds.GRAPHTIGHTEN:
+            if release:
+                tighten(self)

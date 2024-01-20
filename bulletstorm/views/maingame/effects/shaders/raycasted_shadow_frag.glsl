@@ -1,3 +1,4 @@
+// https://api.arcade.academy/en/development/tutorials/raycasting/index.html
 #define N 500
 
 // x, y position of the light
