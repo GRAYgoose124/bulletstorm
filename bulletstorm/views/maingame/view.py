@@ -26,6 +26,7 @@ class SpaceGameView(GuiView, ShaderViewMixin, LevelViewMixin):
         super().__init__(window, name, title)
         ShaderViewMixin.__init__(self)
         LevelViewMixin.__init__(self)
+        self.bg_color = arcade.color_from_hex_string("#00000f")
 
         self.add_shader(GpuBurst)
         # self.add_shader(VectorFieldShader)
@@ -78,7 +79,7 @@ class SpaceGameView(GuiView, ShaderViewMixin, LevelViewMixin):
         LevelViewMixin.update(self, delta_time)
 
     def on_show(self):
-        arcade.set_background_color(arcade.color.BLACK)
+        arcade.set_background_color(self.bg_color)
 
         if self._restart:
             self.level.setup(*self.window.get_size())

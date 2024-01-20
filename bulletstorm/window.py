@@ -3,7 +3,7 @@ import imgui
 
 from arcade_imgui import ArcadeRenderer
 
-from .views import *
+from bulletstorm.views import *
 
 
 class BulletStorm(arcade.Window):
