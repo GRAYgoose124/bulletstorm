@@ -67,5 +67,4 @@ class GameOverView(GuiView):
         self.uimanager.draw()
 
     def on_key_press(self, key, modifiers):
-        logger.debug("Restarting game...")
-        self.window.views["primary"].restart_game()
+        pass
