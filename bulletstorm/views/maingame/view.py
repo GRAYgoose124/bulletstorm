@@ -1,6 +1,8 @@
 from pathlib import Path
 import time, arcade, imgui, logging
 
+from ...core.utils import setup_logging
+
 from ...core.gui.view import GuiView
 from ...core.shader.view_mixin import ShaderViewMixin
 from ...core.level.view_mixin import LevelViewMixin
@@ -16,7 +18,7 @@ from .levels.space.level import SpaceLevel
 
 from .effects.shadows import ShadowsShadertoy
 
-log = logging.getLogger(__name__)
+log = setup_logging(__name__)
 
 
 class SpaceGameView(GuiView, ShaderViewMixin, LevelViewMixin):

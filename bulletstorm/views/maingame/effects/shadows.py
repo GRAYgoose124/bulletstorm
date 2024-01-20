@@ -1,3 +1,4 @@
+import math
 from pathlib import Path
 
 from ....core.utils import setup_logging
@@ -31,5 +32,5 @@ class ShadowsShadertoy(ShadertoyDef):
         )
 
         self.shadertoy.program["lightPosition"] = p
-        self.shadertoy.program["lightSize"] = view.window.get_size()[0] / 2
+        self.shadertoy.program["lightSize"] = view.window.get_size()[0]
         self.shadertoy.render()
