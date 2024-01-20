@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 
 
@@ -14,6 +15,7 @@ class ShaderProgram:
         self.program = self.window.ctx.load_program(
             vertex_shader=self.VERT, fragment_shader=self.FRAG
         )
+        self.program["time"] = time.time()
 
     def draw(self):
         pass

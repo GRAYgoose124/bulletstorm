@@ -21,6 +21,8 @@ class LevelViewMixin:
         assert self.level_constructor is not None
         self.level = self.level_constructor(self)
         self.player = self.level.player
+
+        assert self.player is not None
         self.player_controls_str = "\n".join(
             f"{control}: {key}" for control, key in self.player.keybinds
         )
@@ -41,3 +43,6 @@ class LevelViewMixin:
 
     def end_game(self):
         self._game_over = time.time()
+
+    def on_resize(self, width: int, height: int):
+        self.level.resize(width, height)
