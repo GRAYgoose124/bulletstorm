@@ -23,6 +23,7 @@ class Player(Entity):
     def keybinds(self):
         return self._settings.keybinds
 
+    # N: this is a lot of presumption about the player's physical nature... Perhaps we want a player data class and an entity container?
     def update(self, delta_time):
         body = self.manager.get_physics_object(self).body
         if (
@@ -42,7 +43,7 @@ class Player(Entity):
         body.angular_velocity *= self.gameplay_settings.DRAG
         self.manager.apply_impulse(self, self.acceleration)
 
-    def post_solve(self, entity_a, entity_b, arbiter, space, data):
+        # N: all the collision handlers for entities should probably be appended rather than abc'd/inherited.    def post_solve(self, entity_a, entity_b, arbiter, space, data):
         pass
 
     def collision_handler(self, sprite_a, sprite_b, arbiter, space, data):
@@ -50,6 +51,7 @@ class Player(Entity):
             self.take_damage(1, cooldown=0)
         return True
 
+    # N: even this forces coupling between the player and the keybinds. Perhaps we want a player controller class?
     def key_handler(self, key, modifiers, release=False):
         if key == self.keybinds.MOVE_FORWARD:
             self.acceleration[1] = (

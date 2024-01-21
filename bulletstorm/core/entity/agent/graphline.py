@@ -3,6 +3,8 @@ import networkx as nx
 import pymunk
 from ..base import Entity
 
+DYNAMIC_GRAPH_COLORS = False
+
 
 class GraphLineMixin:
     def __init__(self, *args, **kwargs):
@@ -11,7 +13,7 @@ class GraphLineMixin:
         self.edge_to_line = {}
         self.cached_edge_colors = {}
         self.constraints = {}
-        self.max_lines = 500
+        self.max_lines = 1500
 
         # Shockline could probably provide all... hrm refactor pl0x
 
@@ -39,15 +41,21 @@ class GraphLineMixin:
 
             # create color based on entity graph dist from self.player, a or be could both be non players
             # bad coupling this line stuff needs to be moved
-            if edge in self.cached_edge_colors:
-                color = self.cached_edge_colors[edge]
+
+            if DYNAMIC_GRAPH_COLORS:
+                if edge in self.cached_edge_colors:
+                    color = self.cached_edge_colors[edge]
+                else:
+                    color = self.cache_new_color(edge, entity_a, entity_b)
             else:
-                color = self.cache_new_color(edge, entity_a, entity_b)
+                color = arcade.color.BABY_POWDER
 
             line = arcade.create_line(x1, y1, x2, y2, color, 2)
             self.graph_line_list.append(line)
             self.edge_to_line[edge] = line
-        self.uncache_invalidated_colors()
+
+        if DYNAMIC_GRAPH_COLORS:
+            self.uncache_invalidated_colors()
 
     def cache_new_color(self, edge, entity_a, entity_b):
         a_gd, b_gd = 0, 0
@@ -96,22 +104,6 @@ class GraphLineMixin:
                 ):
                     del self.cached_edge_colors[edge]
 
-    def remove_line_from(self, entity_a: Entity, entity_b: Entity):
-        edge = (entity_a, entity_b)
-        tedge = (entity_b, entity_a)
-        if edge in self.constraints:
-            self.space.remove(self.constraints[edge])
-            del self.constraints[edge]
-        elif tedge in self.constraints:
-            self.space.remove(self.constraints[tedge])
-            del self.constraints[tedge]
-
-        if edge in self.edge_to_line:
-            del self.edge_to_line[edge]
-        if edge in self.cached_edge_colors:
-            del self.cached_edge_colors[edge]
-        self.entity_graph.remove_edge(*edge)
-
     def remove_constraints_on_entity(self, entity):
         for edge in list(self.constraints):
             if entity in edge:
@@ -148,6 +140,26 @@ class GraphLineMixin:
         self.space.add(c)
         self.constraints[(entity_a, entity_b)] = c
         self.entity_graph.add_edge(entity_a, entity_b)
+
+    def remove_line_from(self, entity_a: Entity, entity_b: Entity):
+        success = 0
+        edge = (entity_a, entity_b)
+        if edge in self.constraints:
+            self.space.remove(self.constraints[edge])
+            del self.constraints[edge]
+            self.entity_graph.remove_edge(*edge)
+            success += 1
+
+        if edge in self.edge_to_line:
+            del self.edge_to_line[edge]
+            success += 1
+
+        if DYNAMIC_GRAPH_COLORS:
+            if edge in self.cached_edge_colors:
+                del self.cached_edge_colors[edge]
+                # success += 1
+
+        return success == 2
 
     def has_line(self, entity: Entity):
         return entity in self.entity_graph

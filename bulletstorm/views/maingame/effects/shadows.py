@@ -48,6 +48,6 @@ class ShadowsShadertoy(ShadertoyDef):
         # if not self.do_not_retry:
         #    try:
         self.shadertoy.program["lightPosition"] = p
-        self.shadertoy.program["lightSize"] = view.window.width * 0.25
+        self.shadertoy.program["lightSize"] = view.window.width * 0.6
         #        self.do_not_retry = True
         self.shadertoy.render()

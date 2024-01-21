@@ -1,5 +1,5 @@
 // https://api.arcade.academy/en/development/tutorials/raycasting/index.html
-#define N 500
+#define N 250
 
 // x, y position of the light
 uniform vec2 lightPosition;
@@ -47,7 +47,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     lightAmount *= 1.0 - smoothstep(0.0, lightSize, distanceToLight);
 
     // We'll alternate our display between black and whatever is in channel 1
-    vec4 blackColor = vec4(0.0, 0.02, .01, 1.0);
+    vec4 blackColor = vec4(0.0, 0.00, .00, 1.0);
 
     // Our fragment color will be somewhere between black and channel 1
     // dependent on the value of b.

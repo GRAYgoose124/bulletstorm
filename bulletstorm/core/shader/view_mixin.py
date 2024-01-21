@@ -41,7 +41,7 @@ class ShaderViewMixin:
         st = st_def(self.window)
         self.shadertoys[st.__class__.__name__] = st
 
-        log.debug("Loaded shadertoy: %s", st)
+        log.debug(f"Loaded shadertoy {st.__class__.__name__}")
 
     def draw_shaders(self):
         for shader in self.shaders.values():

@@ -6,7 +6,8 @@
 - [x] turn based battle core (lol)
 - [x] "Agents" Multi-entity subgraphs with specialized graph forces. 
 - [ ] anchor entity feature
-- [ ] shadow casting needs to work in various modes, cone, circle, etc. for flashlight and glowstick / entity graph lights.
+- [ ] shadow casting needs to work in various modes, cone, circle, etc. for flashlight and glowstick / entity graph lights. 
+    - uniform pos inputs for point lights, etc. explosion shader lighting?  
 ### Fixes
  - collision handlers (pre/post/etc)
  - Player damage scaling
