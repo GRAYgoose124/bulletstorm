@@ -43,7 +43,8 @@ class Player(Entity):
         body.angular_velocity *= self.gameplay_settings.DRAG
         self.manager.apply_impulse(self, self.acceleration)
 
-        # N: all the collision handlers for entities should probably be appended rather than abc'd/inherited.    def post_solve(self, entity_a, entity_b, arbiter, space, data):
+    # N: all the collision handlers for entities should probably be appended rather than abc'd/inherited.    def post_solve(self, entity_a, entity_b, arbiter, space, data):
+    def post_solve(self, entity_a, entity_b, arbiter, space, data):
         pass
 
     def collision_handler(self, sprite_a, sprite_b, arbiter, space, data):

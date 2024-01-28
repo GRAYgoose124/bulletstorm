@@ -13,6 +13,7 @@ from .effects.vector_field import VectorFieldShader
 from .widgets.spacebattle import ShipUiWidget
 from .widgets.battlecore import BattleCoreWidget
 from .widgets.debug_lvl_select import DebugLevelSelect
+from .widgets.graphlevel import GraphLevelWidget
 
 from .levels.space.level import SpaceLevel
 
@@ -34,6 +35,7 @@ class SpaceGameView(GuiView, ShaderViewMixin, LevelViewMixin):
         self.add_widget(ShipUiWidget)
         self.add_widget(BattleCoreWidget)
         self.add_widget(DebugLevelSelect)
+        self.add_widget(GraphLevelWidget)
 
         self.select_level(SpaceLevel)
         # self.shaders["VectorFieldShader"].set_entity_list(self.level.manager.entities)

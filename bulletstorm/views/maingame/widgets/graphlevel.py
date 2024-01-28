@@ -1,7 +1,12 @@
-import imgui
+import imgui, logging
 
 
-from ....core.widget import Widget
+from ....core.gui.widget import Widget
 
-from ..battlecore.core import *
-from ..battlecore.battlegame.actors import *
+
+log = logging.getLogger(__name__)
+
+
+class GraphLevelWidget(Widget):
+    def draw(self):
+        pass
