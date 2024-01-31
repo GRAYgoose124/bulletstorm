@@ -15,9 +15,14 @@ class GraphLineMixin:
         self.constraints = {}
         self.max_lines = 1500
 
+        if "worldspace_dims" in kwargs:
+            self.worldspace_dims = kwargs["worldspace_dims"]
+        else:
+            self.worldspace_dims = None
+
         # Shockline could probably provide all... hrm refactor pl0x
 
-    def _update_lines(self):
+    def _update_lines(self, wrapping=False):
         # Update or create lines for each edge
         self.graph_line_list = arcade.ShapeElementList()
         for edge in self.entity_graph.edges:
@@ -41,7 +46,6 @@ class GraphLineMixin:
 
             # create color based on entity graph dist from self.player, a or be could both be non players
             # bad coupling this line stuff needs to be moved
-
             if DYNAMIC_GRAPH_COLORS:
                 if edge in self.cached_edge_colors:
                     color = self.cached_edge_colors[edge]
@@ -128,14 +132,15 @@ class GraphLineMixin:
         # bad coupling
         ba = self.get_physics_object(entity_a).body
         bb = self.get_physics_object(entity_b).body
+        # TODO: custom rather than default
         c = pymunk.DampedSpring(
             ba,
             bb,
             (0, 0),
             (0, 0),
-            ba.mass * bb.mass * 25,
-            1,
-            0.75,
+            ba.mass * bb.mass * 10,
+            1.0,
+            1.0,
         )
         self.space.add(c)
         self.constraints[(entity_a, entity_b)] = c
