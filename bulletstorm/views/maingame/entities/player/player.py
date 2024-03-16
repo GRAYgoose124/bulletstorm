@@ -41,8 +41,9 @@ class SpacePlayer(Player):
                                 log.error(
                                     f"Could not remove line between {self} and {other}"
                                 )
-                    else:
+                    if n_neighbors <= 1:
                         self.manager.remove_entity_from_graph(self)
+
         elif key == self.keybinds.SPLIT:
             if not release:
                 # follow the lines from the player and split from the first node that is not the player
