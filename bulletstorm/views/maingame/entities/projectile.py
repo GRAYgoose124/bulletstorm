@@ -7,6 +7,7 @@ class Projectile(Entity):
         self.origin = origin
         resource = ":resources:images/space_shooter/laserBlue01.png"
         super().__init__(resource, *args, **kwargs)
+        self.decay = 30
 
     def collision_handler(self, entity_a, entity_b, arbiter, space, data):
         # remove projectile
@@ -22,3 +23,10 @@ class Projectile(Entity):
             self.manager.add_line_between(self.origin, entity_b)
 
         return True
+
+    def update(self, delta_time):
+        super().update(delta_time)
+        self.decay -= delta_time
+        if self.decay <= 0:
+            self.manager.remove_entity(self)
+            return

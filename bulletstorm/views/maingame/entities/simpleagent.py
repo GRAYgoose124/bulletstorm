@@ -24,7 +24,7 @@ class ImpulseOnCollision(AgentCollisionHandler):
 class ConstrictionForce(AgentForce):
     def apply(self, node_a, node_b):
         """Apply force to the nodes"""
-        force = 100.0
+        force = 50.0
         # node a and b are pymunk objects, for this force, lets draw them nearer to each other slightly
         b_to_a = Vec2d(*node_a.position) - node_b.position
         b_to_a = b_to_a.normalized()
@@ -38,7 +38,7 @@ class ConstrictionForce(AgentForce):
 class ChasePlayerForce(AgentForce):
     def apply(self, node_a, node_b):
         """Apply force to the nodes"""
-        force = 250.0
+        force = 160.0
         player = node_a.manager.parent.player
 
         # lets draw node a towards the player

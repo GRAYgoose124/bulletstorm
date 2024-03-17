@@ -10,6 +10,7 @@ from .....core.entity.manager import EntityAlreadyRemovedError
 from ...entities.player.player import SpacePlayer
 from ...entities.asteroid import Asteroid
 from ...entities.simpleagent import Catcher
+from ...entities.shooter import Shooter
 
 from .settings import SpaceGamePlayerSettings
 
@@ -45,6 +46,24 @@ def spawn_catchers(level):
             default_p[1] + random.uniform(-200, 200),
         )
         Catcher.add_to_manager(level.manager, center=p)
+        placed.append(p)
+
+    return placed
+
+
+def spawn_shooters(level):
+    default_p = level.manager.get_worldspace_center()
+
+    placed = []
+    for _ in range(10):
+        p = (
+            default_p[0] + random.uniform(-200, 200),
+            default_p[1] + random.uniform(-200, 200),
+        )
+        shooter = Shooter(center_x=p[0], center_y=p[1])
+        level.manager.add_entity(
+            shooter, mass=2.0, tag="asteroid", collide_with_own_type=False
+        )
         placed.append(p)
 
     return placed
@@ -86,6 +105,7 @@ def spawn_player(level, position: tuple[int, int] = None, mass=1.0):
         "player", "asteroid", level.player.collision_handler
     )
 
+    level.manager.player = level.player
     return level.player
 
 
@@ -184,6 +204,7 @@ class SpaceLevel(LevelBase):
 
         spawn_player(self)
         spawn_catchers(self)
+        spawn_shooters(self)
         generate_asteroids(self)
 
     def update_level(self, delta_time):

@@ -24,15 +24,21 @@ def shoot(entity, target_tag="enemy"):
     )
     entity.manager.add_entity(
         projectile,
-        tag="projectile",
+        tag=f"projectile_{target_tag}",
         collide_with_own_type=False,
     )
-    entity.manager.add_collision_handler(
-        "projectile", "asteroid", projectile.collision_handler
-    )
-    entity.manager.add_collision_handler(
-        "projectile", "agent", projectile.collision_handler
-    )
+
+    if target_tag == "enemy":
+        entity.manager.add_collision_handler(
+            f"projectile_{target_tag}", "asteroid", projectile.collision_handler
+        )
+        entity.manager.add_collision_handler(
+            f"projectile_{target_tag}", "agent", projectile.collision_handler
+        )
+    elif target_tag == "player":
+        entity.manager.add_collision_handler(
+            f"projectile_{target_tag}", "player", projectile.collision_handler
+        )
 
     proj = entity.manager.get_physics_object(projectile)
     proj.body.friction = 0
