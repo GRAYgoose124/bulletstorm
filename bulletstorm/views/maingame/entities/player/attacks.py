@@ -7,10 +7,10 @@ from ...effects.gpu_explosion import make_explosion
 from ...entities.projectile import Projectile
 
 
-def shoot(entity, target_tag="enemy"):
+def shoot(entity, target_tag="enemy", angle_offset=90):
     """Shoots a projectile from the entity, hits target_tags."""
     x, y = entity.center_x, entity.center_y
-    angle = entity.angle + 90
+    angle = entity.angle + angle_offset
     # span in front of the entity using it's angle simply
     x, y = (
         x + np.cos(np.radians(angle)) * 50,

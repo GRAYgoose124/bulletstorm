@@ -203,9 +203,9 @@ class SpaceLevel(LevelBase):
         self.manager = AgentManager(self.parent, worldspace_type="wrapping")
 
         spawn_player(self)
-        spawn_catchers(self)
+        # spawn_catchers(self)
+        # generate_asteroids(self)
         spawn_shooters(self)
-        generate_asteroids(self)
 
     def update_level(self, delta_time):
         # self._update_asteroids()
