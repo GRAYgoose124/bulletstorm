@@ -30,7 +30,7 @@ class Burst:
 
 class GpuBurst(ShaderProgram):
     VERT = Path(__file__).parent / "shaders" / "gpu_explosion_vert.glsl"
-    FRAG = Path(__file__).parent / "shaders" / "gpu_explosion_frag.glsl"
+    FRAG = Path(__file__).parent / "shaders" / "default_frag.glsl"
 
     def __init__(self, window):
         self.window = window

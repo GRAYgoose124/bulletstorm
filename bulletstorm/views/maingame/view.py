@@ -1,6 +1,8 @@
 from pathlib import Path
 import time, arcade, imgui, logging
 
+from ...core.utils import setup_logging
+
 from ...core.gui.view import GuiView
 from ...core.shader.view_mixin import ShaderViewMixin
 from ...core.level.view_mixin import LevelViewMixin
@@ -11,12 +13,13 @@ from .effects.vector_field import VectorFieldShader
 from .widgets.spacebattle import ShipUiWidget
 from .widgets.battlecore import BattleCoreWidget
 from .widgets.debug_lvl_select import DebugLevelSelect
+from .widgets.graphlevel import GraphLevelWidget
 
 from .levels.space.level import SpaceLevel
 
 from .effects.shadows import ShadowsShadertoy
 
-log = logging.getLogger(__name__)
+log = setup_logging(__name__)
 
 
 class SpaceGameView(GuiView, ShaderViewMixin, LevelViewMixin):
@@ -24,6 +27,7 @@ class SpaceGameView(GuiView, ShaderViewMixin, LevelViewMixin):
         super().__init__(window, name, title)
         ShaderViewMixin.__init__(self)
         LevelViewMixin.__init__(self)
+        self.bg_color = arcade.color_from_hex_string("#00000f")
 
         self.add_shader(GpuBurst)
         # self.add_shader(VectorFieldShader)
@@ -31,6 +35,7 @@ class SpaceGameView(GuiView, ShaderViewMixin, LevelViewMixin):
         self.add_widget(ShipUiWidget)
         self.add_widget(BattleCoreWidget)
         self.add_widget(DebugLevelSelect)
+        self.add_widget(GraphLevelWidget)
 
         self.select_level(SpaceLevel)
         # self.shaders["VectorFieldShader"].set_entity_list(self.level.manager.entities)
@@ -76,7 +81,7 @@ class SpaceGameView(GuiView, ShaderViewMixin, LevelViewMixin):
         LevelViewMixin.update(self, delta_time)
 
     def on_show(self):
-        arcade.set_background_color(arcade.color.BLACK)
+        arcade.set_background_color(self.bg_color)
 
         if self._restart:
             self.level.setup(*self.window.get_size())

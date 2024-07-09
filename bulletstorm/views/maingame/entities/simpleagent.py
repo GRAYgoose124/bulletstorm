@@ -35,6 +35,20 @@ class ConstrictionForce(AgentForce):
         body_b.apply_impulse_at_local_point(b_to_a * force, (0, 0))
 
 
+class ChasePlayerForce(AgentForce):
+    def apply(self, node_a, node_b):
+        """Apply force to the nodes"""
+        force = 250.0
+        player = node_a.manager.parent.player
+
+        # lets draw node a towards the player
+        a_to_player = Vec2d(*player.position) - node_a.position
+        a_to_player = a_to_player.normalized()
+
+        body_a = node_a.manager.get_physics_object(node_a).body
+        body_a.apply_impulse_at_local_point(a_to_player * force, (0, 0))
+
+
 Catcher = AgentSpec(
     base_entity_cls=Asteroid,
     base_args=(
@@ -46,7 +60,7 @@ Catcher = AgentSpec(
         (0, 1): ConstrictionForce(),
         (1, 2): ConstrictionForce(),
         (2, 3): ConstrictionForce(),
-        (3, 0): ConstrictionForce(),
+        (3, 0): ChasePlayerForce(),
     },
     collision_handlers=[ImpulseOnCollision()],
 )

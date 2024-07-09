@@ -30,8 +30,18 @@ class SpacePlayer(Player):
                 # disconnect one line from the player
                 if self.manager.has_line(self):
                     neighbors = self.manager.entity_graph.adj[self]
-                    if neighbors:
-                        self.manager.remove_line_from(self, next(iter(neighbors)))
+                    n_neighbors = len(neighbors)
+                    if n_neighbors > 0:
+                        other = next(iter(neighbors))
+                        removed = self.manager.remove_line_from(self, other)
+                        if not removed:
+                            removed2 = self.manager.remove_line_from(other, self)
+                            # N.B. Probably the source of https://github.com/GRAYgoose124/bulletstorm/issues/1
+                            if not removed2:
+                                log.error(
+                                    f"Could not remove line between {self} and {other}"
+                                )
+                    else:
                         self.manager.remove_entity_from_graph(self)
         elif key == self.keybinds.SPLIT:
             if not release:

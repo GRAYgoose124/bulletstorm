@@ -6,3 +6,4 @@
 *.lock
 *.pyc
 imgui.ini
+.prof

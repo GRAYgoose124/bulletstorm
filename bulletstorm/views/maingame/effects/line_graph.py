@@ -28,10 +28,6 @@ class LineShaderProgram(ShaderProgram):
                 entity_b.center_y,
             )
 
-            # Calculate the color and other logic as in your existing code
-            # Append data to line_data list
-            # ...
-
             if (
                 len(line_data) // 5 >= max_lines
             ):  # 5 elements per line (2 for position, 3 for color)

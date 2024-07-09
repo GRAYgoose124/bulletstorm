@@ -180,8 +180,7 @@ def generate_asteroids(level, n=600, n_dist=10, max_tries_recip=2):
 
 class SpaceLevel(LevelBase):
     def setup(self):
-        self.manager = AgentManager(self.parent)
-        self.manager._generate_worldspace_bounds()
+        self.manager = AgentManager(self.parent, worldspace_type="wrapping")
 
         spawn_player(self)
         spawn_catchers(self)
