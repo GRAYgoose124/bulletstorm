@@ -1,0 +1,8 @@
+- effect to active effects (multiple)
+- colored bullets based on effect
+- shot patterns
+- items / equips
+- stats
+- ui / hud / inventory
+- better enemy logic and types, fix
+- bullets need to despawn after a duration

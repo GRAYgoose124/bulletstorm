@@ -1,0 +1,9 @@
+[package]
+name = "rbh"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+arr_macro = "0.2.1"
+rand = "0.8.5"
+raylib = "5.0.1"

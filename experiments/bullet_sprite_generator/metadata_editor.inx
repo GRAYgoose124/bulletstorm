@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+    <name>Metadata Editor</name>
+    <id>metadata.editor</id>
+    <param name="selected_id" type="string" _gui-text="Selected Object ID">ID of the selected object</param>
+    <param name="damage" type="int" default="10">Damage</param>
+    <param name="speed" type="float" default="1.0">Speed</param>
+    <param name="effects" type="string" default="">Effects (comma separated)</param>
+    <param name="movement_types" type="string" default="">Movement Types (comma separated)</param>
+
+    <effect>
+        <object-type>all</object-type>
+        <effects-menu>
+            <submenu _name="Game Dev"/>
+        </effects-menu>
+    </effect>
+    <script>
+        <command location="inx" interpreter="python">metadata_editor.py</command>
+    </script>
+</inkscape-extension>

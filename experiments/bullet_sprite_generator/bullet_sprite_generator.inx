@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+    <name>Bullet Sprite Generator</name>
+    <id>bullet.sprite.generator</id>
+    <param name="damage" type="int" default="10">Damage</param>
+    <param name="speed" type="float" default="1.0">Speed</param>
+    <param name="effects" type="string" default="">Effects (comma separated)</param>
+    <param name="movement_types" type="string" default="">Movement Types (comma separated)</param>
+
+    <effect>
+        <object-type>all</object-type>
+        <effects-menu>
+            <submenu _name="Game Dev"/>
+        </effects-menu>
+    </effect>
+    <script>
+        <command location="inx" interpreter="python">bullet_sprite_generator.py</command>
+    </script>
+</inkscape-extension>
