@@ -13,30 +13,48 @@ pub struct Bullet {
     pub velocity: Vector2,
     pub radius: f32,
     pub bullet_type: BulletType,
-    pub effect: Effect,
+    pub effect: Option<Effect>,
+    pub color: Color,
+    pub lifetime: f32,
 }
 
 impl Bullet {
-    pub fn new(position: Vector2, velocity: Vector2, bullet_type: BulletType, effect: Effect) -> Self {
+    pub fn new(position: Vector2, velocity: Vector2, bullet_type: BulletType, effect: Option<Effect>) -> Self {
+        let (color, lifetime) = match bullet_type {
+            BulletType::Player => (Color::GREEN, 2.0),
+            BulletType::Enemy => {
+                match effect {
+                    Some(Effect { effect_type, .. }) => match effect_type {
+                        crate::player::EffectType::Weak => (Color::YELLOW, 1.5),
+                        crate::player::EffectType::Paralyzed => (Color::PURPLE, 1.5),
+                        crate::player::EffectType::Sick => (Color::LIME, 1.5),
+                        crate::player::EffectType::Burning => (Color::RED, 1.5),
+                        crate::player::EffectType::Freezing => (Color::SKYBLUE, 1.5),
+                        crate::player::EffectType::None => (Color::WHITE, 1.5),
+                    },
+                    None => (Color::WHITE, 1.5),
+                }
+            }
+        };
+
         Bullet {
             position,
             velocity,
             radius: 5.0,
             bullet_type,
             effect,
+            color,
+            lifetime,
         }
     }
 
-    pub fn update(&mut self) {
-        self.position += self.velocity;
+    pub fn update(&mut self, delta_time: f32) {
+        self.position += self.velocity * delta_time;
+        self.lifetime -= delta_time;
     }
 
     pub fn draw(&self, d: &mut RaylibDrawHandle) {
-        let color = match self.bullet_type {
-            BulletType::Enemy => Color::YELLOW,
-            BulletType::Player => Color::GREEN,
-        };
-        d.draw_circle_v(self.position, self.radius, color);
+        d.draw_circle_v(self.position, self.radius, self.color);
     }
 
     pub fn is_out_of_bounds(&self) -> bool {
@@ -44,5 +62,9 @@ impl Bullet {
             || self.position.x > WINDOW_WIDTH as f32
             || self.position.y < 0.0
             || self.position.y > WINDOW_HEIGHT as f32
+    }
+
+    pub fn is_expired(&self) -> bool {
+        self.lifetime <= 0.0
     }
 }

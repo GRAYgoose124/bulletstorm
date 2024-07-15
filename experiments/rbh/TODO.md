@@ -6,3 +6,5 @@
 - ui / hud / inventory
 - better enemy logic and types, fix
 - bullets need to despawn after a duration
+- dash
+- weapons: mine layer, shotgun, laser, homing, etc

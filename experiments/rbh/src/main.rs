@@ -1,13 +1,16 @@
 mod player;
 mod enemy;
-mod bullet; 
+mod bullet;
 mod game;
+mod ui;
+mod inventory;
+mod item;
+mod stats;
 
 use game::Game;
 
-const WINDOW_WIDTH: i32 = 800;
-const WINDOW_HEIGHT: i32 = 600;
-
+const WINDOW_WIDTH: i32 = 1280;
+const WINDOW_HEIGHT: i32 = 720;
 
 fn main() {
     let (mut rl, thread) = raylib::init()

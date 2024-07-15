@@ -1,13 +1,15 @@
+use crate::item::Item;
+
 pub struct Inventory {
     items: Vec<Item>,
     capacity: usize,
 }
 
 impl Inventory {
-    pub fn new() -> Self {
+    pub fn new(capacity: usize) -> Self {
         Inventory {
             items: Vec::new(),
-            capacity: 10,
+            capacity,
         }
     }
 
@@ -20,6 +22,15 @@ impl Inventory {
         }
     }
 
-    // ... other inventory management methods ...
-}
+    pub fn remove_item(&mut self, index: usize) -> Option<Item> {
+        if index < self.items.len() {
+            Some(self.items.remove(index))
+        } else {
+            None
+        }
+    }
 
+    pub fn get_items(&self) -> &[Item] {
+        &self.items
+    }
+}

@@ -4,15 +4,15 @@ use rand::{thread_rng, Rng};
 use crate::player::Player;
 use crate::enemy::{Enemy, EnemyType};
 use crate::bullet::{Bullet, BulletType};
-use crate::{WINDOW_WIDTH};
+use crate::{ui::UI};
+use crate::stats::GameStats;
 
 pub struct Game {
     pub player: Player,
     pub enemies: Vec<Enemy>,
     pub bullets: Vec<Bullet>,
-    pub wave: u32,
-    pub enemies_killed: u32,
-    pub spawn_timer: f32,
+    pub stats: GameStats,
+    pub ui: UI,
 }
 
 impl Game {
@@ -21,9 +21,8 @@ impl Game {
             player: Player::new(),
             enemies: Vec::new(),
             bullets: Vec::new(),
-            wave: 0,
-            enemies_killed: 0,
-            spawn_timer: 0.0,
+            stats: GameStats::default(),
+            ui: UI::new(),
         }
     }
 
@@ -32,82 +31,61 @@ impl Game {
 
         self.player.update(rl, delta_time);
 
-        // Spawn new wave if all enemies are defeated
         if self.enemies.is_empty() {
-            self.wave += 1;
+            self.stats.wave += 1;
             self.spawn_wave();
         }
 
-        // Update enemies and their bullets
         for enemy in &mut self.enemies {
             let new_bullets = enemy.update(delta_time, self.player.position);
             self.bullets.extend(new_bullets);
         }
 
-        // Player shooting
         if rl.is_mouse_button_down(MouseButton::MOUSE_BUTTON_LEFT) {
-            if let Some(bullet) = self.player.shoot(rl.get_mouse_position().into()) {
-                self.bullets.push(bullet);
-            }
+            let new_bullets = self.player.shoot(rl.get_mouse_position().into());
+            self.bullets.extend(new_bullets);
         }
 
-        // Update bullets
-        for bullet in &mut self.bullets {
-            bullet.update();
-        }
-
-        // Check for collisions
+        self.update_bullets(delta_time);
         self.handle_collisions();
+        self.spawn_enemies(delta_time);
 
-        // Remove out-of-bounds bullets
-        self.bullets.retain(|bullet| !bullet.is_out_of_bounds());
-
-        // Spawn new enemies
-        self.spawn_timer += delta_time;
-        if self.spawn_timer >= 5.0 && self.enemies.len() < (self.wave * 2).try_into().unwrap() {
-            self.spawn_enemy();
-            self.spawn_timer = 0.0;
-        }
+        let game_stats = self.stats.clone();
+        self.ui.update(game_stats);
     }
 
-    fn spawn_wave(&mut self) {
-        for _ in 0..self.wave {
-            self.spawn_enemy();
-        }
-    }
-
-    fn spawn_enemy(&mut self) {
-        let mut rng = thread_rng();
-
-        let enemy_type = match rng.gen_range(0 .. 3) {
-            0 => EnemyType::Basic,
-            1 => EnemyType::Sniper,
-            _ => EnemyType::Shotgun,
-        };
-        self.enemies.push(Enemy::new(enemy_type));
+    fn update_bullets(&mut self, delta_time: f32) {
+        self.bullets.retain_mut(|bullet| {
+            bullet.update(delta_time);
+            !bullet.is_expired() && !bullet.is_out_of_bounds()
+        });
     }
 
     fn handle_collisions(&mut self) {
-        let mut bullets_to_remove = Vec::new();
+        let mut player_hit = false;
         let mut enemies_to_remove = Vec::new();
+        let mut bullets_to_remove = Vec::new();
 
-        for (bullet_index, bullet) in self.bullets.iter().enumerate() {
+        for (bullet_idx, bullet) in self.bullets.iter().enumerate() {
             match bullet.bullet_type {
                 BulletType::Enemy => {
-                    if self.player.position.distance_to(bullet.position) < self.player.size + bullet.radius {
-                        self.player.apply_effect(bullet.effect);
+                    if !player_hit && self.player.position.distance_to(bullet.position) < self.player.size + bullet.radius {
+                        if let Some(effect) = &bullet.effect {
+                            self.player.apply_effect(effect.clone());
+                        }
                         self.player.health -= 10.0;
-                        bullets_to_remove.push(bullet_index);
+                        bullets_to_remove.push(bullet_idx);
+                        player_hit = true;
                     }
                 }
                 BulletType::Player => {
-                    for (enemy_index, enemy) in self.enemies.iter_mut().enumerate() {
+                    for (enemy_idx, enemy) in self.enemies.iter_mut().enumerate() {
                         if enemy.position.distance_to(bullet.position) < enemy.size + bullet.radius {
-                            if enemy.take_damage(self.player.damage) {
-                                enemies_to_remove.push(enemy_index);
-                                self.enemies_killed += 1;
+                            if enemy.take_damage(self.player.stats.damage * self.player.stats.damage_multiplier) {
+                                enemies_to_remove.push(enemy_idx);
+                                self.stats.enemies_killed += 1;
                             }
-                            bullets_to_remove.push(bullet_index);
+                            bullets_to_remove.push(bullet_idx);
                             break;
                         }
                     }
@@ -115,12 +93,38 @@ impl Game {
             }
         }
 
-        // Remove collided bullets and enemies
-        for index in bullets_to_remove.iter().rev() {
-            self.bullets.swap_remove(*index);
+        for idx in bullets_to_remove.into_iter().rev() {
+            self.bullets.swap_remove(idx);
         }
-        for index in enemies_to_remove.iter().rev() {
-            self.enemies.swap_remove(*index);
+
+        for idx in enemies_to_remove.into_iter().rev() {
+            self.enemies.swap_remove(idx);
+        }
+    }
+
+    fn spawn_wave(&mut self) {
+        for _ in 0..self.stats.wave {
+            self.spawn_enemy();
+        }
+    }
+
+    fn spawn_enemy(&mut self) {
+        let mut rng = thread_rng();
+        let enemy_type = match rng.gen_range(0..=3) {
+            0 => EnemyType::Basic,
+            1 => EnemyType::Sniper,
+            2 => EnemyType::Shotgun,
+            3 => EnemyType::Boss,
+            _ => unreachable!(),
+        };
+        self.enemies.push(Enemy::new(enemy_type));
+    }
+
+    fn spawn_enemies(&mut self, delta_time: f32) {
+        self.stats.spawn_timer += delta_time;
+        if self.stats.spawn_timer >= 5.0 && self.enemies.len() < self.stats.wave as usize * 2 {
+            self.spawn_enemy();
+            self.stats.spawn_timer = 0.0;
         }
     }
 
@@ -131,16 +135,12 @@ impl Game {
             bullet.draw(d);
         }
 
-        self.player.draw(d);
-
         for enemy in &self.enemies {
             enemy.draw(d);
         }
 
-        d.draw_text(&format!("Health: {:.0}", self.player.health), 10, 10, 20, Color::WHITE);
-        d.draw_text(&format!("Wave: {}", self.wave), 10, 40, 20, Color::WHITE);
-        d.draw_text(&format!("Enemies Killed: {}", self.enemies_killed), 10, 70, 20, Color::WHITE);
-        d.draw_fps(WINDOW_WIDTH - 100, 10);
+        self.player.draw(d);
+        self.ui.draw(d, &self.player);
     }
 
     pub fn is_game_over(&self) -> bool {
@@ -151,8 +151,8 @@ impl Game {
         self.player = Player::new();
         self.enemies.clear();
         self.bullets.clear();
-        self.wave = 0;
-        self.enemies_killed = 0;
-        self.spawn_timer = 0.0;
+        self.stats.wave = 0;
+        self.stats.enemies_killed = 0;
+        self.stats.spawn_timer = 0.0;
     }
 }
