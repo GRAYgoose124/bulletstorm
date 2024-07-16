@@ -117,7 +117,7 @@ impl Player {
             
             match &self.equipped_item {
                 Some(Item::Weapon(weapon)) => weapon.shoot(self.position, direction),
-                _ => vec![Bullet::new(self.position, direction * 10.0, BulletType::Player, None)],
+                _ => vec![Bullet::new(self.position, direction * 300.0, BulletType::Player, None)],
             }
         } else {
             Vec::new()

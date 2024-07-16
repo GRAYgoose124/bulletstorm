@@ -56,8 +56,8 @@ impl Enemy {
         let shoot_interval = match self.enemy_type {
             EnemyType::Basic => 1.0,
             EnemyType::Sniper => 2.0,
-            EnemyType::Shotgun => 1.5,
-            EnemyType::Boss => 1.0,
+            EnemyType::Shotgun => 0.5,
+            EnemyType::Boss => 0.8,
         };
 
         if self.shoot_timer >= shoot_interval {
@@ -99,15 +99,15 @@ pub enum ShotPattern {
 impl ShotPattern {
     pub fn create_bullets(&self, position: Vector2, direction: Vector2) -> Vec<Bullet> {
         match self {
-            ShotPattern::Single => vec![Bullet::new(position, direction * 3.0, BulletType::Enemy, Some(Effect { effect_type: crate::player::EffectType::Weak, duration: 3.0 }))],
-            ShotPattern::Precise => vec![Bullet::new(position, direction * 5.0, BulletType::Enemy, Some(Effect { effect_type: crate::player::EffectType::Paralyzed, duration: 2.0 }))],
+            ShotPattern::Single => vec![Bullet::new(position, direction * 300.0, BulletType::Enemy, Some(Effect { effect_type: crate::player::EffectType::Weak, duration: 3.0 }))],
+            ShotPattern::Precise => vec![Bullet::new(position, direction * 500.0, BulletType::Enemy, Some(Effect { effect_type: crate::player::EffectType::Paralyzed, duration: 1.5 }))],
             ShotPattern::Spread(count) => {
                 let mut bullets = Vec::new();
                 for i in 0..*count {
                     let angle = (i as f32 - (*count as f32 - 1.0) / 2.0) * 0.2;
                     let mut rotated_direction = direction;
                     rotated_direction.rotate(angle);
-                    bullets.push(Bullet::new(position, rotated_direction * 2.5, BulletType::Enemy, Some(Effect { effect_type: crate::player::EffectType::Sick, duration: 5.0 })));
+                    bullets.push(Bullet::new(position, rotated_direction * 25., BulletType::Enemy, Some(Effect { effect_type: crate::player::EffectType::Sick, duration: 5.0 })));
                 }
                 bullets
             },
@@ -116,7 +116,7 @@ impl ShotPattern {
                 for i in 0..*count {
                     let angle = (i as f32 / *count as f32) * 2.0 * std::f32::consts::PI;
                     let rotated_direction = Vector2::new(angle.cos(), angle.sin());
-                    bullets.push(Bullet::new(position, rotated_direction * 3.0, BulletType::Enemy, Some(Effect { effect_type: crate::player::EffectType::Burning, duration: 3.0 })));
+                    bullets.push(Bullet::new(position, rotated_direction * 300.0, BulletType::Enemy, Some(Effect { effect_type: crate::player::EffectType::Burning, duration: 3.0 })));
                 }
                 bullets
             },

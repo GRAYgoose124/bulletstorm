@@ -8,6 +8,7 @@ pub enum BulletType {
     Player,
 }
 
+// TODO: damage
 pub struct Bullet {
     pub position: Vector2,
     pub velocity: Vector2,
@@ -26,7 +27,7 @@ impl Bullet {
                 match effect {
                     Some(Effect { effect_type, .. }) => match effect_type {
                         crate::player::EffectType::Weak => (Color::YELLOW, 1.5),
-                        crate::player::EffectType::Paralyzed => (Color::PURPLE, 1.5),
+                        crate::player::EffectType::Paralyzed => (Color::PURPLE, 1.0),
                         crate::player::EffectType::Sick => (Color::LIME, 1.5),
                         crate::player::EffectType::Burning => (Color::RED, 1.5),
                         crate::player::EffectType::Freezing => (Color::SKYBLUE, 1.5),

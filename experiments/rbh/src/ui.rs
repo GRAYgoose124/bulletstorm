@@ -1,6 +1,6 @@
 use raylib::prelude::*;
-use crate::game::Game;
 use crate::player::Player;
+use crate::bullet::Bullet;
 use crate::stats::GameStats;
 
 use crate::WINDOW_HEIGHT;
@@ -24,7 +24,7 @@ impl UI {
         self.enemies_killed = stats.enemies_killed;
     }
 
-    pub fn draw(&self, d: &mut RaylibDrawHandle, player: &Player) {
+    pub fn draw(&self, d: &mut RaylibDrawHandle, player: &Player, bullets: &Vec<Bullet>) {
         // Draw health bar
         let health_width = (player.health / player.stats.max_health * 200.0) as i32;
         d.draw_rectangle(10, WINDOW_HEIGHT - 30, health_width, 20, Color::GREEN);
@@ -41,5 +41,10 @@ impl UI {
         // Draw game stats
         d.draw_text(&format!("Wave: {}", self.wave), WINDOW_WIDTH - 150, 10, 20, Color::WHITE);
         d.draw_text(&format!("Enemies: {}", self.enemies_killed), WINDOW_WIDTH - 150, 35, 20, Color::WHITE);
+        
+        // draw n bullets
+        d.draw_text(&format!("Bullets: {}", bullets.len()), WINDOW_WIDTH - 150, 60, 20, Color::WHITE);
+        
+        d.draw_fps(10, 10);
     }
 }

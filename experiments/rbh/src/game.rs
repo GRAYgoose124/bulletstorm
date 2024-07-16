@@ -1,5 +1,6 @@
 use raylib::prelude::*;
 use rand::{thread_rng, Rng};
+use rayon::prelude::*;
 
 use crate::player::Player;
 use crate::enemy::{Enemy, EnemyType};
@@ -55,10 +56,24 @@ impl Game {
     }
 
     fn update_bullets(&mut self, delta_time: f32) {
-        self.bullets.retain_mut(|bullet| {
-            bullet.update(delta_time);
-            !bullet.is_expired() && !bullet.is_out_of_bounds()
-        });
+        // TODO dedicate thread?
+        let indices_to_remove: Vec<usize> = self.bullets.par_iter_mut()
+            .enumerate()
+            .filter_map(|(index, bullet)| {
+                bullet.update(delta_time);
+                if bullet.is_expired() || bullet.is_out_of_bounds() {
+                    Some(index)
+                } else {
+                    None
+                }
+            })
+            .collect();
+        
+        // Remove bullets in reverse order to maintain correct indices
+        for &index in indices_to_remove.iter().rev() {
+            self.bullets.swap_remove(index);
+        }
+          
     }
 
     fn handle_collisions(&mut self) {
@@ -140,7 +155,7 @@ impl Game {
         }
 
         self.player.draw(d);
-        self.ui.draw(d, &self.player);
+        self.ui.draw(d, &self.player, &self.bullets);
     }
 
     pub fn is_game_over(&self) -> bool {
