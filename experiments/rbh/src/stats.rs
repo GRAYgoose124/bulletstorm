@@ -1,3 +1,4 @@
+#[derive(Clone, Copy)]
 pub struct Stats {
     pub max_health: f32,
     pub speed: f32,
@@ -17,6 +18,26 @@ impl Default for Stats {
             speed_multiplier: 1.0,
             damage_multiplier: 1.0,
         }
+    }
+}
+
+impl Stats {
+    pub fn add(&mut self, other: Stats) {
+        self.max_health += other.max_health;
+        self.speed += other.speed;
+        self.damage += other.damage;
+        self.fire_rate += other.fire_rate;
+        self.speed_multiplier += other.speed_multiplier;
+        self.damage_multiplier += other.damage_multiplier;
+    }
+
+    pub fn subtract(&mut self, other: Stats) {
+        self.max_health -= other.max_health;
+        self.speed -= other.speed;
+        self.damage -= other.damage;
+        self.fire_rate -= other.fire_rate;
+        self.speed_multiplier -= other.speed_multiplier;
+        self.damage_multiplier -= other.damage_multiplier;
     }
 }
 

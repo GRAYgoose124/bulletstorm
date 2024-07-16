@@ -1,6 +1,7 @@
 use raylib::prelude::*;
 use std::collections::HashMap;
-use crate::{WINDOW_HEIGHT, WINDOW_WIDTH, bullet::{Bullet, BulletType}, stats::Stats, item::Item};
+
+use crate::{WINDOW_HEIGHT, WINDOW_WIDTH, bullet::{Bullet, BulletType}, stats::Stats, item::Item, item::ItemSlot, inventory::Inventory, item::Ability, item::create_sample_items};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum EffectType {
@@ -24,21 +25,30 @@ pub struct Player {
     pub health: f32,
     pub active_effects: HashMap<EffectType, Effect>,
     pub stats: Stats,
-    pub equipped_item: Option<Item>,
+    pub inventory: Inventory,
+    pub equipped_items: HashMap<ItemSlot, Item>,
     pub shoot_timer: f32,
 }
 
 impl Player {
     pub fn new() -> Self {
-        Player {
+        let mut player = Player {
             position: Vector2::new(WINDOW_WIDTH as f32 / 2.0, WINDOW_HEIGHT as f32 - 50.0),
             size: 20.0,
             health: 100.0,
             active_effects: HashMap::new(),
             stats: Stats::default(),
-            equipped_item: None,
+            inventory: Inventory::new(20),
+            equipped_items: HashMap::new(),
             shoot_timer: 0.0,
+        };
+
+        // Add sample items to inventory
+        for item in create_sample_items() {
+            player.inventory.add_item(item);
         }
+
+        player
     }
 
     pub fn update(&mut self, rl: &RaylibHandle, delta_time: f32) {
@@ -108,6 +118,33 @@ impl Player {
 
     pub fn apply_effect(&mut self, effect: Effect) {
         self.active_effects.insert(effect.effect_type, effect);
+    }   
+
+    pub fn equip_item(&mut self, item: Item) {
+        if let Some(old_item) = self.equipped_items.insert(item.slot, item) {
+            self.inventory.add_item(old_item);
+        }
+        self.update_stats();
+    }
+
+    pub fn unequip_item(&mut self, slot: ItemSlot) {
+        if let Some(item) = self.equipped_items.remove(&slot) {
+            self.inventory.add_item(item);
+        }
+        self.update_stats();
+    }
+
+    fn update_stats(&mut self) {
+        // Reset stats to base values
+        self.stats = Stats::default();
+    
+        // Apply stats from equipped items
+        for item in self.equipped_items.values() {
+            self.stats.add(item.stats);
+            for effect in &item.effects {
+                self.active_effects.insert(effect.effect_type, effect.clone());
+            }
+        }
     }
 
     pub fn shoot(&mut self, mouse_position: Vector2) -> Vec<Bullet> {
@@ -115,10 +152,26 @@ impl Player {
             self.shoot_timer = self.stats.fire_rate;
             let direction = (mouse_position - self.position).normalized();
             
-            match &self.equipped_item {
-                Some(Item::Weapon(weapon)) => weapon.shoot(self.position, direction),
-                _ => vec![Bullet::new(self.position, direction * 300.0, BulletType::Player, None)],
+            let mut bullets = vec![Bullet::new(self.position, direction * 300.0, BulletType::Player, None)];
+    
+            if let Some(Item { abilities, .. }) = self.equipped_items.get(&ItemSlot::Weapon) {
+                for ability in abilities {
+                    match ability {
+                        Ability::ModifyShot(shot_pattern) => {
+                            bullets = shot_pattern.create_bullets(self.position, direction, BulletType::Player, None);
+                        },
+                        Ability::OnHit(effect_fn) => {
+                            let effect = effect_fn();
+                            for bullet in &mut bullets {
+                                bullet.effect = Some(effect.clone());
+                            }
+                        },
+                        Ability::OnMove(_) => {}
+                    }
+                }
             }
+    
+            bullets
         } else {
             Vec::new()
         }

@@ -8,3 +8,5 @@
 - bullets need to despawn after a duration
 - dash
 - weapons: mine layer, shotgun, laser, homing, etc
+
+- items are crashing

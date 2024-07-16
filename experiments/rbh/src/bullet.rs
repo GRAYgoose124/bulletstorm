@@ -1,5 +1,6 @@
 use raylib::prelude::*;
-use crate::player::Effect;
+
+use crate::player::{Effect, EffectType};
 use crate::{WINDOW_HEIGHT, WINDOW_WIDTH};
 
 #[derive(Clone, Copy)]
@@ -26,12 +27,12 @@ impl Bullet {
             BulletType::Enemy => {
                 match effect {
                     Some(Effect { effect_type, .. }) => match effect_type {
-                        crate::player::EffectType::Weak => (Color::YELLOW, 1.5),
-                        crate::player::EffectType::Paralyzed => (Color::PURPLE, 1.0),
-                        crate::player::EffectType::Sick => (Color::LIME, 1.5),
-                        crate::player::EffectType::Burning => (Color::RED, 1.5),
-                        crate::player::EffectType::Freezing => (Color::SKYBLUE, 1.5),
-                        crate::player::EffectType::None => (Color::WHITE, 1.5),
+                        EffectType::Weak => (Color::YELLOW, 1.5),
+                        EffectType::Paralyzed => (Color::PURPLE, 1.0),
+                        EffectType::Sick => (Color::LIME, 1.5),
+                        EffectType::Burning => (Color::RED, 1.5),
+                        EffectType::Freezing => (Color::SKYBLUE, 1.5),
+                        EffectType::None => (Color::WHITE, 1.5),
                     },
                     None => (Color::WHITE, 1.5),
                 }
