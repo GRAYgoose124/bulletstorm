@@ -15,13 +15,12 @@ const WINDOW_HEIGHT: i32 = 720;
 fn main() {
     let (mut rl, thread) = raylib::init()
         .size(WINDOW_WIDTH, WINDOW_HEIGHT)
-        .title("Improved Bullet Hell Game")
+        .title("Bullet Hell Game")
         .build();
 
     let mut game = Game::new();
 
     rl.set_target_fps(60);
-
     while !rl.window_should_close() {
         game.update(&rl);
 

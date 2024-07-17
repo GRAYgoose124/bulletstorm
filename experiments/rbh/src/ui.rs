@@ -39,11 +39,12 @@ impl UI {
         d.draw_rectangle_lines(10, WINDOW_HEIGHT - 30, 200, 20, Color::WHITE);
 
         // Draw active effects
-        let mut effect_y = 10;
+        let mut effect_y = WINDOW_HEIGHT - 60;
+        let effect_x = 10;
         for (effect_type, effect) in player.borrow().active_effects.clone() {
             let effect_text = format!("{:?}: {:.1}s", effect_type, effect.duration);
-            d.draw_text(&effect_text, 10, effect_y, 20, Color::WHITE);
-            effect_y += 25;
+            d.draw_text(&effect_text, effect_x, effect_y, 20, Color::WHITE);
+            effect_y -= 25;
         }
 
         // Draw game stats

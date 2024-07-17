@@ -113,7 +113,8 @@ impl Game {
                         if let Some(effect) = &bullet.effect {
                             player.apply_effect(effect.clone());
                         }
-                        player.health -= 10.0;
+                        // TODO: per bullet damage
+                        player.health -= 1.0;
                         bullets_to_remove.push(bullet_idx);
                         player_hit = true;
                     }

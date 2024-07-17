@@ -37,7 +37,7 @@ impl Player {
             size: 20.0,
             health: 100.0,
             active_effects: HashMap::new(),
-            stats: Stats::default(),
+            stats: Stats::new(200.0, 5.0, 10.0, 0.1, 1.0, 1.0),
             inventory: Inventory::new(20),
             equipped_items: HashMap::new(),
             shoot_timer: 0.0,
@@ -53,8 +53,12 @@ impl Player {
 
     pub fn update(&mut self, rl: &RaylibHandle, delta_time: f32) {
         self.update_effects(delta_time);
+
         self.move_player(rl);
         self.shoot_timer -= delta_time;
+
+        // Regenerate health
+        self.health += 2.0 * delta_time;
         self.health = self.health.clamp(0.0, self.stats.max_health);
     }
 
@@ -69,7 +73,7 @@ impl Player {
             } else {
                 match effect_type {
                     EffectType::Weak => self.stats.damage_multiplier = 0.5,
-                    EffectType::Sick => self.health -= 1.0 * delta_time,
+                    EffectType::Sick => self.health -= 2.5 * delta_time,
                     EffectType::Burning => self.health -= 2.0 * delta_time,
                     EffectType::Freezing => self.stats.speed_multiplier = 0.5,
                     _ => {}

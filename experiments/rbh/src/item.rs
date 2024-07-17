@@ -60,14 +60,14 @@ pub fn create_sample_items() -> Vec<Item> {
         Item::new(
             "Leather Helmet".to_string(),
             ItemSlot::Helmet,
-            Stats { max_health: 20.0, ..Default::default() },
+            Stats { damage: 2.0, max_health: 20.0, ..Default::default() },
             vec![],
             vec![],
         ),
         Item::new(
             "Speed Boots".to_string(),
             ItemSlot::Boots,
-            Stats { speed: 1.0, ..Default::default() },
+            Stats { fire_rate: 0.4, speed_multiplier: 2.0, ..Default::default() },
             vec![],
             vec![],
         ),

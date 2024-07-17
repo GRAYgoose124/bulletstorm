@@ -9,4 +9,4 @@
 - dash
 - weapons: mine layer, shotgun, laser, homing, etc
 
-- items are crashing
+- items need to mod not overwrite/add/set
