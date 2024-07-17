@@ -152,15 +152,15 @@ pub enum ShotPattern {
 impl ShotPattern {
     pub fn create_bullets(&self, position: Vector2, direction: Vector2, bullet_type: BulletType, effect: Option<Effect>) -> Vec<Bullet> {
         match self {
-            ShotPattern::Single => vec![Bullet::new(position, direction * 300.0, bullet_type, effect)],
-            ShotPattern::Precise => vec![Bullet::new(position, direction * 500.0, bullet_type, effect)],
+            ShotPattern::Single => vec![Bullet::new(position, direction * 300.0, 10., bullet_type, effect)],
+            ShotPattern::Precise => vec![Bullet::new(position, direction * 500.0, 10., bullet_type, effect)],
             ShotPattern::Spread(count) => {
                 let mut bullets = Vec::new();
                 for i in 0..*count {
                     let angle = (i as f32 - (*count as f32 - 1.0) / 2.0) * 0.2;
                     let mut rotated_direction = direction;
                     rotated_direction.rotate(angle);
-                    bullets.push(Bullet::new(position, rotated_direction * 250.0, bullet_type, effect.clone()));
+                    bullets.push(Bullet::new(position, rotated_direction * 250.0, 10.0, bullet_type, effect.clone()));
                 }
                 bullets
             },
@@ -169,7 +169,7 @@ impl ShotPattern {
                 for i in 0..*count {
                     let angle = (i as f32 / *count as f32) * 2.0 * std::f32::consts::PI;
                     let rotated_direction = Vector2::new(angle.cos(), angle.sin());
-                    bullets.push(Bullet::new(position, rotated_direction * 300.0, bullet_type, effect.clone()));
+                    bullets.push(Bullet::new(position, rotated_direction * 300.0, 10.0, bullet_type, effect.clone()));
                 }
                 bullets
             },

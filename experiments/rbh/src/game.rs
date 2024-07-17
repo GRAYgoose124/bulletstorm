@@ -9,7 +9,7 @@ use crate::enemy::{Enemy, EnemyType};
 use crate::bullet::{Bullet, BulletType};
 use crate::ui::UI;
 use crate::stats::GameStats;
-use crate::network::GameState;
+use crate::network::{GameState, NetworkManager, BulletState, Vector2 as NetworkVector2};
 use crate::item::ItemSlot;
 use crate::WINDOW_WIDTH;
 
@@ -21,11 +21,18 @@ pub struct Game {
     pub stats: GameStats,
     pub ui: UI,
     pub is_multiplayer: bool,
+    pub network_manager: Option<NetworkManager>,
 }
 
 impl Game {
     pub fn new(is_multiplayer: bool) -> Self {
         let local_player = Rc::new(RefCell::new(Player::new(0)));
+        let network_manager = if is_multiplayer {
+            Some(NetworkManager::new("127.0.0.1:8080"))
+        } else {
+            None
+        };
+
         Game {
             local_player: local_player.clone(),
             other_players: HashMap::new(),
@@ -34,6 +41,7 @@ impl Game {
             stats: GameStats::default(),
             ui: UI::new(),
             is_multiplayer,
+            network_manager,
         }
     }
 
@@ -42,25 +50,44 @@ impl Game {
 
         self.local_player.borrow_mut().update(rl, delta_time);
 
-        if self.enemies.is_empty() {
-            self.stats.wave += 1;
-            self.spawn_wave();
-        }
+        if let Some(ref mut network_manager) = self.network_manager {
+            network_manager.send_player_state(&self.local_player.borrow());
+            if let Some(game_state) = network_manager.receive_game_state() {
+                self.update_from_network(game_state);
+            }
+        } else {
+            if self.enemies.is_empty() {
+                self.stats.wave += 1;
+                self.spawn_wave();
+            }
 
-        let mut new_bullets = Vec::new();
-        for enemy in &mut self.enemies {
-            new_bullets.extend(enemy.update(delta_time));
+            let mut new_bullets = Vec::new();
+            for enemy in &mut self.enemies {
+                new_bullets.extend(enemy.update(delta_time));
+            }
+            self.bullets.extend(new_bullets);
+
+            self.spawn_enemies(delta_time);
         }
-        self.bullets.extend(new_bullets);
 
         if rl.is_mouse_button_down(MouseButton::MOUSE_BUTTON_LEFT) {
-            let new_bullets = self.local_player.borrow_mut().shoot(rl.get_mouse_position());
-            self.bullets.extend(new_bullets);
+            let new_bullets = self.create_player_bullets(rl.get_mouse_position());
+            self.bullets.extend(new_bullets.clone());
+            
+            if let Some(ref mut network_manager) = self.network_manager {
+                for bullet in new_bullets {
+                    let bullet_state = BulletState {
+                        position: NetworkVector2(bullet.position.x, bullet.position.y),
+                        velocity: NetworkVector2(bullet.velocity.x, bullet.velocity.y),
+                        bullet_type: format!("{:?}", bullet.bullet_type),
+                    };
+                    network_manager.send_bullet(&bullet_state);
+                }
+            }
         }
 
         self.update_bullets(delta_time);
         self.handle_collisions();
-        self.spawn_enemies(delta_time);
 
         self.ui.update(self.stats);
     }
@@ -100,7 +127,7 @@ impl Game {
 
     pub fn update_from_network(&mut self, game_state: GameState) {
         // Update other players
-        for player_state in game_state.players {
+        for player_state in &game_state.players {
             if player_state.id != self.local_player.borrow().id {
                 if let Some(player) = self.other_players.get_mut(&player_state.id) {
                     let mut player = player.borrow_mut();
@@ -115,11 +142,14 @@ impl Game {
             }
         }
 
+        // Remove disconnected players
+        self.other_players.retain(|&id, _| game_state.players.iter().any(|p| p.id == id));
+
         // Update enemies
-        self.enemies = game_state.enemies.into_iter().map(|e| Enemy::from_state(e)).collect();
+        self.enemies = game_state.enemies.into_iter().map(Enemy::from_state).collect();
 
         // Update bullets
-        self.bullets = game_state.bullets.into_iter().map(|b| Bullet::from_state(b)).collect();
+        self.bullets = game_state.bullets.into_iter().map(Bullet::from_state).collect();
 
         // Update wave
         self.stats.wave = game_state.wave;
@@ -152,6 +182,14 @@ impl Game {
         }
     }
 
+    fn create_player_bullets(&self, mouse_position: Vector2) -> Vec<Bullet> {
+        let player = self.local_player.borrow();
+        let direction = (mouse_position - player.position).normalized();
+        let bullet_speed = 10.0; // Adjust this value to control bullet speed
+        
+        vec![Bullet::new(player.position, direction, bullet_speed, BulletType::Player, None)]
+    }
+
     fn update_bullets(&mut self, delta_time: f32) {
         self.bullets.retain_mut(|bullet| {
             bullet.update(delta_time);
@@ -164,6 +202,7 @@ impl Game {
         let mut enemies_to_remove = Vec::new();
         let mut bullets_to_remove = Vec::new();
 
+        // Check bullet collisions
         for (bullet_idx, bullet) in self.bullets.iter().enumerate() {
             match bullet.bullet_type {
                 BulletType::Enemy => {
@@ -172,7 +211,6 @@ impl Game {
                         if let Some(effect) = &bullet.effect {
                             player.apply_effect(effect.clone());
                         }
-                        // TODO: per bullet damage
                         player.health -= 1.0;
                         bullets_to_remove.push(bullet_idx);
                         player_hit = true;
@@ -193,12 +231,19 @@ impl Game {
             }
         }
 
-        for idx in bullets_to_remove.into_iter().rev() {
-            self.bullets.swap_remove(idx);
+        // Remove bullets and enemies safely
+        bullets_to_remove.sort_unstable_by(|a, b| b.cmp(a));
+        for &idx in bullets_to_remove.iter() {
+            if idx < self.bullets.len() {
+                self.bullets.remove(idx);
+            }
         }
 
-        for idx in enemies_to_remove.into_iter().rev() {
-            self.enemies.swap_remove(idx);
+        enemies_to_remove.sort_unstable_by(|a, b| b.cmp(a));
+        for &idx in enemies_to_remove.iter() {
+            if idx < self.enemies.len() {
+                self.enemies.remove(idx);
+            }
         }
     }
 
@@ -209,7 +254,7 @@ impl Game {
         }
     }
 
-    fn handle_inventory_interactions(&mut self, rl: &RaylibHandle) {
+    pub fn handle_inventory_interactions(&mut self, rl: &RaylibHandle) {
         let mouse_position = rl.get_mouse_position();
 
         let items_count = self.local_player.borrow().inventory.get_items().len();

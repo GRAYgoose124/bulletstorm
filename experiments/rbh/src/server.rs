@@ -11,10 +11,7 @@ const WINDOW_WIDTH: f32 = 1280.0;
 const WINDOW_HEIGHT: f32 = 720.0;
 
 #[derive(Clone, Serialize, Deserialize)]
-struct Vector2 {
-    x: f32,
-    y: f32,
-}
+struct Vector2(f32, f32);
 
 #[derive(Clone, Serialize, Deserialize)]
 struct PlayerState {
@@ -40,7 +37,7 @@ struct BulletState {
 
 #[derive(Clone, Serialize, Deserialize)]
 struct GameState {
-    players: HashMap<u32, PlayerState>,
+    players: Vec<PlayerState>,
     enemies: Vec<EnemyState>,
     bullets: Vec<BulletState>,
     wave: u32,
@@ -63,7 +60,7 @@ impl Server {
         Server {
             clients: HashMap::new(),
             game_state: GameState {
-                players: HashMap::new(),
+                players: Vec::new(),
                 enemies: Vec::new(),
                 bullets: Vec::new(),
                 wave: 1,
@@ -82,17 +79,17 @@ impl Server {
 
         let player_state = PlayerState {
             id: player_id,
-            position: Vector2 { x: WINDOW_WIDTH / 2.0, y: WINDOW_HEIGHT - 50.0 },
+            position: Vector2(WINDOW_WIDTH / 2.0, WINDOW_HEIGHT - 50.0),
             health: 100.0,
         };
-        self.game_state.players.insert(player_id, player_state);
+        self.game_state.players.push(player_state);
 
         player_id
     }
 
     fn remove_client(&mut self, player_id: u32) {
         self.clients.remove(&player_id);
-        self.game_state.players.remove(&player_id);
+        self.game_state.players.retain(|p| p.id != player_id);
     }
 
     fn update(&mut self) {
@@ -104,20 +101,19 @@ impl Server {
 
     fn update_enemies(&mut self) {
         for enemy in &mut self.game_state.enemies {
-            // Simple enemy movement logic
-            enemy.position.y += 1.0;
-            if enemy.position.y > WINDOW_HEIGHT {
-                enemy.position.y = 0.0;
+            enemy.position.1 += 1.0;
+            if enemy.position.1 > WINDOW_HEIGHT {
+                enemy.position.1 = 0.0;
             }
         }
     }
 
     fn update_bullets(&mut self) {
         self.game_state.bullets.retain_mut(|bullet| {
-            bullet.position.x += bullet.velocity.x;
-            bullet.position.y += bullet.velocity.y;
-            bullet.position.x >= 0.0 && bullet.position.x <= WINDOW_WIDTH && 
-            bullet.position.y >= 0.0 && bullet.position.y <= WINDOW_HEIGHT
+            bullet.position.0 += bullet.velocity.0;
+            bullet.position.1 += bullet.velocity.1;
+            bullet.position.0 >= 0.0 && bullet.position.0 <= WINDOW_WIDTH && 
+            bullet.position.1 >= 0.0 && bullet.position.1 <= WINDOW_HEIGHT
         });
     }
 
@@ -126,7 +122,7 @@ impl Server {
         if self.game_state.enemies.len() < self.game_state.wave as usize * 2 {
             let enemy = EnemyState {
                 id: self.next_enemy_id,
-                position: Vector2 { x: rng.gen_range(0.0..WINDOW_WIDTH), y: 0.0 },
+                position: Vector2(rng.gen_range(0.0..WINDOW_WIDTH), 0.0),
                 enemy_type: "Basic".to_string(),
                 health: 50.0,
             };
@@ -136,24 +132,23 @@ impl Server {
     }
 
     fn check_collisions(&mut self) {
-        // Simplified collision detection
         for bullet in &self.game_state.bullets {
             if bullet.bullet_type == "Player" {
                 self.game_state.enemies.retain_mut(|enemy| {
-                    let dx = bullet.position.x - enemy.position.x;
-                    let dy = bullet.position.y - enemy.position.y;
+                    let dx = bullet.position.0 - enemy.position.0;
+                    let dy = bullet.position.1 - enemy.position.1;
                     let distance = (dx * dx + dy * dy).sqrt();
-                    if distance < 30.0 {  // Assuming enemy radius is 30
+                    if distance < 30.0 {
                         enemy.health -= 10.0;
                     }
                     enemy.health > 0.0
                 });
             } else {
-                for player in self.game_state.players.values_mut() {
-                    let dx = bullet.position.x - player.position.x;
-                    let dy = bullet.position.y - player.position.y;
+                for player in &mut self.game_state.players {
+                    let dx = bullet.position.0 - player.position.0;
+                    let dy = bullet.position.1 - player.position.1;
                     let distance = (dx * dx + dy * dy).sqrt();
-                    if distance < 20.0 {  // Assuming player radius is 20
+                    if distance < 20.0 {
                         player.health -= 5.0;
                     }
                 }
@@ -172,8 +167,9 @@ impl Server {
 
     fn handle_client_message(&mut self, player_id: u32, message: &str) {
         if let Ok(player_state) = serde_json::from_str::<PlayerState>(message) {
-            if let Some(current_state) = self.game_state.players.get_mut(&player_id) {
+            if let Some(current_state) = self.game_state.players.iter_mut().find(|p| p.id == player_id) {
                 current_state.position = player_state.position;
+                current_state.health = player_state.health;
             }
         } else if let Ok(bullet) = serde_json::from_str::<BulletState>(message) {
             self.game_state.bullets.push(bullet);

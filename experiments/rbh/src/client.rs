@@ -25,19 +25,9 @@ fn main() {
         .build();
 
     let mut game = Game::new(is_multiplayer);
-    let mut network_manager = if is_multiplayer {
-        Some(NetworkManager::new("127.0.0.1:8080"))
-    } else {
-        None
-    };
 
     rl.set_target_fps(60);
     while !rl.window_should_close() {
-        if let Some(ref mut nm) = network_manager {
-            nm.send_player_state(&game.local_player.borrow());
-            nm.receive_game_state(&mut game);
-        }
-
         game.update(&rl);
 
         if game.is_game_over() {

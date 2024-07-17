@@ -4,16 +4,25 @@ use crate::player::{Effect, EffectType};
 use crate::network::BulletState;
 use crate::{WINDOW_HEIGHT, WINDOW_WIDTH};
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub enum BulletType {
     Enemy,
     Player,
 }
 
+#[derive(Debug, Clone, Copy)]
+pub enum BulletPath {
+    Linear,
+    Sinusoidal { amplitude: f32, frequency: f32 },
+    Parametric { t: f32, x_func: fn(f32) -> f32, y_func: fn(f32) -> f32 },
+}
+
 // TODO: damage
+#[derive(Clone)]
 pub struct Bullet {
     pub position: Vector2,
     pub velocity: Vector2,
+    pub speed: f32,  // Add this line
     pub radius: f32,
     pub bullet_type: BulletType,
     pub effect: Option<Effect>,
@@ -23,15 +32,8 @@ pub struct Bullet {
     initial_position: Vector2,
 }
 
-pub enum BulletPath {
-    Linear,
-    Sinusoidal { amplitude: f32, frequency: f32 },
-    Parametric { t: f32, x_func: fn(f32) -> f32, y_func: fn(f32) -> f32 },
-}
-
-
 impl Bullet {
-    pub fn new(position: Vector2, velocity: Vector2, bullet_type: BulletType, effect: Option<Effect>) -> Self {        
+    pub fn new(position: Vector2, direction: Vector2, speed: f32, bullet_type: BulletType, effect: Option<Effect>) -> Self {
         let (color, lifetime) = match bullet_type {
             BulletType::Player => (Color::GREEN, 2.0),
             BulletType::Enemy => {
@@ -51,7 +53,8 @@ impl Bullet {
 
         Bullet {
             position,
-            velocity,
+            velocity: direction.normalized() * speed,
+            speed,  // Add this line
             radius: 5.0,
             bullet_type,
             effect,
@@ -68,7 +71,7 @@ impl Bullet {
                 self.position += self.velocity * delta_time;
             },
             BulletPath::Sinusoidal { amplitude, frequency } => {
-                let distance = self.velocity.length() * delta_time;
+                let distance = self.speed * delta_time;
                 let angle = (self.position - self.initial_position).angle_to(self.velocity);
                 let x = distance * angle.cos();
                 let y = distance * angle.sin() + amplitude * (frequency * self.lifetime).sin();
@@ -84,9 +87,12 @@ impl Bullet {
     }
 
     pub fn from_state(state: BulletState) -> Self {
+        let velocity = Vector2::new(state.velocity.0, state.velocity.1);
+        let speed = velocity.length();
         Bullet::new(
             Vector2::new(state.position.0, state.position.1),
-            Vector2::new(state.velocity.0, state.velocity.1),
+            velocity.normalized(),
+            speed,
             match state.bullet_type.as_str() {
                 "Player" => BulletType::Player,
                 "Enemy" => BulletType::Enemy,

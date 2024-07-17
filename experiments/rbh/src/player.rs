@@ -158,7 +158,7 @@ impl Player {
             self.shoot_timer = self.stats.fire_rate;
             let direction = (mouse_position - self.position).normalized();
             
-            let mut bullets = vec![Bullet::new(self.position, direction * 300.0, BulletType::Player, None)];
+            let mut bullets = vec![Bullet::new(self.position, direction * 300.0, 10.0, BulletType::Player, None)];
     
             if let Some(Item { abilities, .. }) = self.equipped_items.get(&ItemSlot::Weapon) {
                 for ability in abilities {
