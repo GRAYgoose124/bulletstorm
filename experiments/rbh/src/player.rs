@@ -20,6 +20,7 @@ pub struct Effect {
 }
 
 pub struct Player {
+    pub id: u32,
     pub position: Vector2,
     pub size: f32,
     pub health: f32,
@@ -31,8 +32,9 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn new() -> Self {
+    pub fn new(id: u32) -> Self {
         let mut player = Player {
+            id,
             position: Vector2::new(WINDOW_WIDTH as f32 / 2.0, WINDOW_HEIGHT as f32 - 50.0),
             size: 20.0,
             health: 100.0,

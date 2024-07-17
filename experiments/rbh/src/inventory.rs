@@ -1,5 +1,6 @@
 use crate::item::Item;
 
+#[derive(Clone)]
 pub struct Inventory {
     items: Vec<Item>,
     capacity: usize,

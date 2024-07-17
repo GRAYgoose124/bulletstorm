@@ -1,6 +1,7 @@
 use raylib::prelude::*;
 
 use crate::player::{Effect, EffectType};
+use crate::network::BulletState;
 use crate::{WINDOW_HEIGHT, WINDOW_WIDTH};
 
 #[derive(Clone, Copy)]
@@ -18,10 +19,19 @@ pub struct Bullet {
     pub effect: Option<Effect>,
     pub color: Color,
     pub lifetime: f32,
+    pub path: BulletPath,
+    initial_position: Vector2,
 }
 
+pub enum BulletPath {
+    Linear,
+    Sinusoidal { amplitude: f32, frequency: f32 },
+    Parametric { t: f32, x_func: fn(f32) -> f32, y_func: fn(f32) -> f32 },
+}
+
+
 impl Bullet {
-    pub fn new(position: Vector2, velocity: Vector2, bullet_type: BulletType, effect: Option<Effect>) -> Self {
+    pub fn new(position: Vector2, velocity: Vector2, bullet_type: BulletType, effect: Option<Effect>) -> Self {        
         let (color, lifetime) = match bullet_type {
             BulletType::Player => (Color::GREEN, 2.0),
             BulletType::Enemy => {
@@ -47,12 +57,43 @@ impl Bullet {
             effect,
             color,
             lifetime,
+            path: BulletPath::Linear,
+            initial_position: position,
         }
     }
 
     pub fn update(&mut self, delta_time: f32) {
-        self.position += self.velocity * delta_time;
+        match self.path {
+            BulletPath::Linear => {
+                self.position += self.velocity * delta_time;
+            },
+            BulletPath::Sinusoidal { amplitude, frequency } => {
+                let distance = self.velocity.length() * delta_time;
+                let angle = (self.position - self.initial_position).angle_to(self.velocity);
+                let x = distance * angle.cos();
+                let y = distance * angle.sin() + amplitude * (frequency * self.lifetime).sin();
+                self.position = self.initial_position + Vector2::new(x, y);
+            },
+            BulletPath::Parametric { ref mut t, x_func, y_func } => {
+                *t += delta_time;
+                self.position.x = self.initial_position.x + x_func(*t);
+                self.position.y = self.initial_position.y + y_func(*t);
+            },
+        }
         self.lifetime -= delta_time;
+    }
+
+    pub fn from_state(state: BulletState) -> Self {
+        Bullet::new(
+            Vector2::new(state.position.0, state.position.1),
+            Vector2::new(state.velocity.0, state.velocity.1),
+            match state.bullet_type.as_str() {
+                "Player" => BulletType::Player,
+                "Enemy" => BulletType::Enemy,
+                _ => BulletType::Enemy,
+            },
+            None,
+        )
     }
 
     pub fn draw(&self, d: &mut RaylibDrawHandle) {

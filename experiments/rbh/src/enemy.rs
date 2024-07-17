@@ -9,6 +9,7 @@ use crate::{WINDOW_WIDTH, WINDOW_HEIGHT, bullet::{Bullet, BulletType}};
 use crate::player::Player;
 use crate::player::Effect;
 use crate::player::EffectType;
+use crate::network::EnemyState;
 
 #[derive(Clone, Copy)]
 pub enum EnemyType {
@@ -19,6 +20,7 @@ pub enum EnemyType {
 }
 
 pub struct Enemy {
+    pub id: u32,
     pub position: Vector2,
     pub velocity: Vector2,
     pub size: f32,
@@ -30,7 +32,7 @@ pub struct Enemy {
 }
 
 impl Enemy {
-    pub fn new(enemy_type: EnemyType, player: Rc<RefCell<Player>>) -> Self {
+    pub fn new(id: u32, enemy_type: EnemyType, player: Rc<RefCell<Player>>) -> Self {
         let mut rng = thread_rng();
 
         let (size, health, shot_pattern) = match enemy_type {
@@ -41,6 +43,7 @@ impl Enemy {
         };
 
         Enemy {
+            id,
             position: Vector2::new(rng.gen_range(50.0..WINDOW_WIDTH as f32 - 50.0), 50.0),
             velocity: Vector2::new(rng.gen_range(-1.0..1.0), rng.gen_range(0.5..1.0)),
             size,
@@ -75,6 +78,28 @@ impl Enemy {
             self.shoot()
         } else {
             Vec::new()
+        }
+    }
+
+    pub fn from_state(state: EnemyState) -> Self {
+        let enemy_type = match state.enemy_type.as_str() {
+            "Basic" => EnemyType::Basic,
+            "Sniper" => EnemyType::Sniper,
+            "Shotgun" => EnemyType::Shotgun,
+            "Boss" => EnemyType::Boss,
+            _ => EnemyType::Basic,
+        };
+        
+        Enemy {
+            id: state.id,
+            position: Vector2::new(state.position.0, state.position.1),
+            velocity: Vector2::zero(),
+            size: 30.0, // Default size, adjust as needed
+            shoot_timer: 0.0,
+            health: state.health,
+            enemy_type,
+            shot_pattern: ShotPattern::Single, // Default pattern, adjust as needed
+            player: Rc::new(RefCell::new(Player::new(0))), // Dummy player, adjust as needed
         }
     }
 
