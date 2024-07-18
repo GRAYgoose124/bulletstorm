@@ -6,25 +6,25 @@ pub struct Stats {
     pub fire_rate: f32,
     pub speed_multiplier: f32,
     pub damage_multiplier: f32,
+    pub bullet_speed: f32,  // Add this line
 }
 
-// TODO better defaults, items should be able to temp modify these instead of just add.
 impl Default for Stats {
     fn default() -> Self {
         Stats {
             max_health: 100.0,
-            speed: 1.0,
+            speed: 5.0,
             damage: 1.0,
             fire_rate: 0.2,
             speed_multiplier: 1.0,
             damage_multiplier: 1.0,
+            bullet_speed: 300.0,  // Add this line
         }
     }
 }
 
-
 impl Stats {
-    pub fn new(max_health: f32, speed: f32, damage: f32, fire_rate: f32, speed_multiplier: f32, damage_multiplier: f32) -> Self {
+    pub fn new(max_health: f32, speed: f32, damage: f32, fire_rate: f32, speed_multiplier: f32, damage_multiplier: f32, bullet_speed: f32) -> Self {
         Stats {
             max_health,
             speed,
@@ -32,6 +32,7 @@ impl Stats {
             fire_rate,
             speed_multiplier,
             damage_multiplier,
+            bullet_speed
         }
     }
 

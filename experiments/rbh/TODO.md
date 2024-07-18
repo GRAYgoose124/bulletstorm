@@ -1,12 +1,4 @@
-- effect to active effects (multiple)
-- colored bullets based on effect
-- shot patterns
-- items / equips
-- stats
-- ui / hud / inventory
-- better enemy logic and types, fix
-- bullets need to despawn after a duration
-- dash
-- weapons: mine layer, shotgun, laser, homing, etc
-
-- items need to mod not overwrite/add/set
+- fire staff ModifyShot not working anymore (after MP update)
+- When an enemy is killed by one player, the other clients may get failed to parse game state errors if not focused.
+- players no longer die, hp bar isn't updating
+- server is only spawning simple bullets

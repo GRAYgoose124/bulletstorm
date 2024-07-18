@@ -22,6 +22,8 @@ pub struct Game {
     pub ui: UI,
     pub is_multiplayer: bool,
     pub network_manager: Option<NetworkManager>,
+    pub is_shooting: bool,
+    pub last_shoot_time: f32,
 }
 
 impl Game {
@@ -48,6 +50,8 @@ impl Game {
             ui: UI::new(),
             is_multiplayer,
             network_manager,
+            is_shooting: false,
+            last_shoot_time: 0.0,
         }
     }
 
@@ -56,41 +60,10 @@ impl Game {
 
         self.local_player.borrow_mut().update(rl, delta_time);
 
-        if let Some(ref mut network_manager) = self.network_manager {
-            let player_position = self.local_player.borrow().position;
-            let move_action = PlayerAction::Move(NetworkVector2::from(player_position));
-            if let Err(e) = network_manager.send_player_action(move_action) {
-                eprintln!("Failed to send player position: {}", e);
-            }
-
-            if rl.is_mouse_button_pressed(MouseButton::MOUSE_BUTTON_LEFT) {
-                let mouse_position = rl.get_mouse_position();
-                let direction = (mouse_position - player_position).normalized();
-                let shoot_action = PlayerAction::Shoot(NetworkVector2::from(direction));
-                if let Err(e) = network_manager.send_player_action(shoot_action) {
-                    eprintln!("Failed to send player shoot action: {}", e);
-                }
-            }
-
-            match network_manager.receive_game_state() {
-                Ok(game_state) => self.update_from_network(game_state),
-                Err(e) => eprintln!("Failed to receive game state: {}", e),
-            }
+        if self.is_multiplayer {
+            self.update_multiplayer(rl, delta_time);
         } else {
-            if self.enemies.is_empty() {
-                self.stats.wave += 1;
-                self.spawn_wave();
-            }
-
-            let mut new_bullets = Vec::new();
-            for enemy in &mut self.enemies {
-                new_bullets.extend(enemy.update(delta_time));
-            }
-            self.bullets.extend(new_bullets);
-
-            self.spawn_enemies(delta_time);
-            self.update_bullets(delta_time);
-            self.handle_collisions();
+            self.update_single_player(rl, delta_time);
         }
 
         // Update UI
@@ -130,17 +103,17 @@ impl Game {
         self.stats.spawn_timer = 0.0;
     }
 
-    pub fn update_from_network(&mut self, game_state: GameState) {
+    fn update_from_network(&mut self, game_state: GameState) {
         // Update other players
         for player_state in &game_state.players {
             if player_state.id != self.local_player.borrow().id {
                 if let Some(player) = self.other_players.get_mut(&player_state.id) {
                     let mut player = player.borrow_mut();
-                    player.position = player_state.position.clone().into(); // Convert NetworkVector2 to raylib Vector2
+                    player.position = player_state.position.clone().into();
                     player.health = player_state.health;
                 } else {
                     let new_player = Rc::new(RefCell::new(Player::new(player_state.id)));
-                    new_player.borrow_mut().position = player_state.position.clone().into(); // Convert NetworkVector2 to raylib Vector2
+                    new_player.borrow_mut().position = player_state.position.clone().into();
                     new_player.borrow_mut().health = player_state.health;
                     self.other_players.insert(player_state.id, new_player);
                 }
@@ -200,6 +173,95 @@ impl Game {
             bullet.update(delta_time);
             !bullet.is_expired() && !bullet.is_out_of_bounds()
         });
+    }
+
+    fn update_single_player(&mut self, rl: &RaylibHandle, delta_time: f32) {
+        if self.enemies.is_empty() {
+            self.stats.wave += 1;
+            self.spawn_wave();
+        }
+
+        let mut new_bullets = Vec::new();
+        for enemy in &mut self.enemies {
+            new_bullets.extend(enemy.update(delta_time));
+        }
+        self.bullets.extend(new_bullets);
+
+        self.spawn_enemies(delta_time);
+        self.update_bullets(delta_time);
+        self.handle_shooting(rl, delta_time);
+        self.handle_collisions();
+    }
+
+    fn update_multiplayer(&mut self, rl: &RaylibHandle, delta_time: f32) {
+        let player_position = self.local_player.borrow().position;
+        let mouse_position = rl.get_mouse_position();
+        let is_mouse_down = rl.is_mouse_button_down(MouseButton::MOUSE_BUTTON_LEFT);
+        
+        // Determine if the player is shooting outside the mutable borrow scope
+        let is_shooting = self.handle_shooting_mp(is_mouse_down, mouse_position, delta_time);
+        
+        if let Some(ref mut network_manager) = self.network_manager {
+            let move_action = PlayerAction::Move(NetworkVector2::from(player_position));
+            if let Err(e) = network_manager.send_player_action(move_action) {
+                eprintln!("Failed to send player position: {}", e);
+            }
+    
+            if is_shooting {
+                let direction = (mouse_position - player_position).normalized();
+                let shoot_action = PlayerAction::Shoot(NetworkVector2::from(direction));
+                if let Err(e) = network_manager.send_player_action(shoot_action) {
+                    eprintln!("Failed to send player shoot action: {}", e);
+                }
+            }
+    
+            match network_manager.receive_game_state() {
+                Ok(game_state) => self.update_from_network(game_state),
+                Err(e) => eprintln!("Failed to receive game state: {}", e),
+            }
+        }
+    }
+
+    fn handle_shooting_mp(&mut self, is_mouse_down: bool, _mouse_position: Vector2, delta_time: f32) -> bool {
+        let player = self.local_player.borrow();
+        let fire_rate = player.stats.fire_rate;
+
+        self.last_shoot_time += delta_time;
+
+        if is_mouse_down && self.last_shoot_time >= fire_rate {
+            self.is_shooting = true;
+            self.last_shoot_time = 0.0;
+            true
+        } else {
+            self.is_shooting = false;
+            false
+        }
+    }
+
+    fn handle_shooting(&mut self, rl: &RaylibHandle, delta_time: f32) {
+        let is_mouse_down = rl.is_mouse_button_down(MouseButton::MOUSE_BUTTON_LEFT);
+        let mouse_position = rl.get_mouse_position();
+        
+        if self.is_multiplayer {
+            self.handle_shooting_mp(is_mouse_down, mouse_position, delta_time);
+        } else {
+            let fire_rate = {
+                let player = self.local_player.borrow();
+                player.stats.fire_rate
+            };
+    
+            self.last_shoot_time += delta_time;
+    
+            if is_mouse_down && self.last_shoot_time >= fire_rate {
+                self.is_shooting = true;
+                self.last_shoot_time = 0.0;
+                // Now, there's no active immutable borrow when we call `shoot`
+                let mut new_bullets = self.local_player.borrow_mut().shoot(mouse_position);
+                self.bullets.append(&mut new_bullets);
+            } else {
+                self.is_shooting = false;
+            }
+        }
     }
 
     fn handle_collisions(&mut self) {

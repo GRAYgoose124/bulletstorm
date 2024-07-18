@@ -72,7 +72,7 @@ impl Server {
         self.spawn_enemies();
         self.check_collisions();
     }
-
+    
     fn update_enemies(&mut self, delta_time: f32) {
         let directions: Vec<(f32, f32)> = self.game_state.enemies
             .iter()

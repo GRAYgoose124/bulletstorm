@@ -39,7 +39,7 @@ impl Player {
             size: 20.0,
             health: 100.0,
             active_effects: HashMap::new(),
-            stats: Stats::new(200.0, 5.0, 10.0, 0.1, 1.0, 1.0),
+            stats: Stats::default(),
             inventory: Inventory::new(20),
             equipped_items: HashMap::new(),
             shoot_timer: 0.0,
@@ -50,6 +50,7 @@ impl Player {
             player.inventory.add_item(item);
         }
 
+        player.update_stats();
         player
     }
 
@@ -126,7 +127,7 @@ impl Player {
         self.active_effects.insert(effect.effect_type, effect);
     }   
 
-    pub fn equip_item(&mut self, item: Item) {
+ pub fn equip_item(&mut self, item: Item) {
         if let Some(old_item) = self.equipped_items.insert(item.slot, item) {
             self.inventory.add_item(old_item);
         }
@@ -158,7 +159,7 @@ impl Player {
             self.shoot_timer = self.stats.fire_rate;
             let direction = (mouse_position - self.position).normalized();
             
-            let mut bullets = vec![Bullet::new(self.position, direction * 300.0, 10.0, BulletType::Player, None)];
+            let mut bullets = vec![Bullet::new(self.position, direction, self.stats.bullet_speed, BulletType::Player, None)];
     
             if let Some(Item { abilities, .. }) = self.equipped_items.get(&ItemSlot::Weapon) {
                 for ability in abilities {
