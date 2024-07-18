@@ -1,6 +1,5 @@
 use std::env;
 use game::Game;
-use network::NetworkManager;
 
 mod player;
 mod enemy;

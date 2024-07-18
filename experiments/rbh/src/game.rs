@@ -9,7 +9,7 @@ use crate::enemy::{Enemy, EnemyType};
 use crate::bullet::{Bullet, BulletType};
 use crate::ui::UI;
 use crate::stats::GameStats;
-use crate::network::{GameState, NetworkManager, BulletState, Vector2 as NetworkVector2};
+use crate::network::{GameState, NetworkManager, PlayerAction, Vector2 as NetworkVector2};
 use crate::item::ItemSlot;
 use crate::WINDOW_WIDTH;
 
@@ -28,7 +28,13 @@ impl Game {
     pub fn new(is_multiplayer: bool) -> Self {
         let local_player = Rc::new(RefCell::new(Player::new(0)));
         let network_manager = if is_multiplayer {
-            Some(NetworkManager::new("127.0.0.1:8080"))
+            match NetworkManager::new("127.0.0.1:8080") {
+                Ok(nm) => Some(nm),
+                Err(e) => {
+                    eprintln!("Failed to create NetworkManager: {}", e);
+                    None
+                }
+            }
         } else {
             None
         };
@@ -51,9 +57,24 @@ impl Game {
         self.local_player.borrow_mut().update(rl, delta_time);
 
         if let Some(ref mut network_manager) = self.network_manager {
-            network_manager.send_player_state(&self.local_player.borrow());
-            if let Some(game_state) = network_manager.receive_game_state() {
-                self.update_from_network(game_state);
+            let player_position = self.local_player.borrow().position;
+            let move_action = PlayerAction::Move(NetworkVector2::from(player_position));
+            if let Err(e) = network_manager.send_player_action(move_action) {
+                eprintln!("Failed to send player position: {}", e);
+            }
+
+            if rl.is_mouse_button_pressed(MouseButton::MOUSE_BUTTON_LEFT) {
+                let mouse_position = rl.get_mouse_position();
+                let direction = (mouse_position - player_position).normalized();
+                let shoot_action = PlayerAction::Shoot(NetworkVector2::from(direction));
+                if let Err(e) = network_manager.send_player_action(shoot_action) {
+                    eprintln!("Failed to send player shoot action: {}", e);
+                }
+            }
+
+            match network_manager.receive_game_state() {
+                Ok(game_state) => self.update_from_network(game_state),
+                Err(e) => eprintln!("Failed to receive game state: {}", e),
             }
         } else {
             if self.enemies.is_empty() {
@@ -68,27 +89,11 @@ impl Game {
             self.bullets.extend(new_bullets);
 
             self.spawn_enemies(delta_time);
+            self.update_bullets(delta_time);
+            self.handle_collisions();
         }
 
-        if rl.is_mouse_button_down(MouseButton::MOUSE_BUTTON_LEFT) {
-            let new_bullets = self.create_player_bullets(rl.get_mouse_position());
-            self.bullets.extend(new_bullets.clone());
-            
-            if let Some(ref mut network_manager) = self.network_manager {
-                for bullet in new_bullets {
-                    let bullet_state = BulletState {
-                        position: NetworkVector2(bullet.position.x, bullet.position.y),
-                        velocity: NetworkVector2(bullet.velocity.x, bullet.velocity.y),
-                        bullet_type: format!("{:?}", bullet.bullet_type),
-                    };
-                    network_manager.send_bullet(&bullet_state);
-                }
-            }
-        }
-
-        self.update_bullets(delta_time);
-        self.handle_collisions();
-
+        // Update UI
         self.ui.update(self.stats);
     }
 
@@ -131,11 +136,11 @@ impl Game {
             if player_state.id != self.local_player.borrow().id {
                 if let Some(player) = self.other_players.get_mut(&player_state.id) {
                     let mut player = player.borrow_mut();
-                    player.position = Vector2::new(player_state.position.0, player_state.position.1);
+                    player.position = player_state.position.clone().into(); // Convert NetworkVector2 to raylib Vector2
                     player.health = player_state.health;
                 } else {
                     let new_player = Rc::new(RefCell::new(Player::new(player_state.id)));
-                    new_player.borrow_mut().position = Vector2::new(player_state.position.0, player_state.position.1);
+                    new_player.borrow_mut().position = player_state.position.clone().into(); // Convert NetworkVector2 to raylib Vector2
                     new_player.borrow_mut().health = player_state.health;
                     self.other_players.insert(player_state.id, new_player);
                 }
