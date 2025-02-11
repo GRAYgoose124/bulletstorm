@@ -6,7 +6,7 @@ from .game.actors.enemies import *
 
 
 def main():
-    logging.basicConfig(level=logging.DEBUG, format="%(message)s")
+    logging.basicConfig(level=logging.DEBUG, format="%(filename)s:%(lineno)s - %(message)s")
 
     player_party = Party("Player")
     player_party.add_actor(mitochondra_hero())

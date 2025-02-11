@@ -1,9 +1,5 @@
-from ...core import Actor, ActorStats
+from ...core import Enemy, ActorStats
 from ..actions.attacks import slash_attack
-
-
-class Enemy(Actor):
-    pass
 
 
 skeleton_enemy = lambda: Enemy(

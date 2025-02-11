@@ -1,17 +1,13 @@
-from ...core import Actor, ActorStats
+from ...core import Hero, ActorStats
 from ..actions.attacks import slash_attack
 
 
-class Hero(Actor):
-    pass
-
-
 mitochondra_hero = lambda: Hero(
-    "Mitochondra",
+    name="Mitochondra",
     actions=[
         slash_attack,
     ],
-    statistics=ActorStats(health=15, stamina=12, mana=5, dexterity=5),
+    statistics=ActorStats(health=15, stamina=12, mana=15, dexterity=5),
 )
 
 

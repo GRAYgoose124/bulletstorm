@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from typing import Literal
 
 
 @dataclass
@@ -65,6 +66,79 @@ class ActorStats:
     def __setitem__(self, key, value):
         setattr(self, key, value)
 
+    def __keys__(self):
+        return self.__annotations__.keys()
+
     def __iter__(self):
         for k in self.__annotations__:
             yield k, getattr(self, k)
+
+
+@dataclass
+class Effect:
+    name: str
+    description: str
+
+    duration: int | None = None
+    chance: float | None = None
+    type: Literal["permanent", "temporary"] = "permanent"
+    trigger: Literal["on_apply", "on_tick", "on_remove"] = "on_apply"
+    
+    effects_on_target: ActorStats = field(default_factory=ActorStats.zero)
+
+    def apply(self, actor):
+        if self.type == "permanent":
+            actor.statistics += self.effects_on_target
+        elif self.type == "temporary":
+            actor.temporary_statistics += self.effects_on_target
+
+    def remove(self, actor):
+        if self.type == "permanent":
+            actor.statistics -= self.effects_on_target
+        elif self.type == "temporary":
+            actor.temporary_statistics -= self.effects_on_target
+
+
+@dataclass
+class Profession:
+    bonus_stats: ActorStats = field(default_factory=ActorStats.zero)
+    effects: list[Effect] = field(default_factory=list)
+
+
+@dataclass
+class Title:
+    name: str
+    description: str
+    
+    bonus_stats: ActorStats = field(default_factory=ActorStats.zero)
+    effects: list[Effect] = field(default_factory=list)
+
+
+@dataclass
+class Requirement:
+    name: str
+    description: str
+
+    stat_requirements: list[tuple[str, int]] = field(default_factory=list)
+    gear_requirements: list[tuple[str, int]] = field(default_factory=list)
+    profession_requirements: list[str] = field(default_factory=list)
+    title_requirements: list[str] = field(default_factory=list)
+
+    def check(self, actor):
+        for key, value in self.stat_requirements:
+            if key not in actor.statistics.__keys__():
+                raise ValueError(f"Invalid requirement: {key}")
+            if actor.statistics[key] < value:
+                return False
+        for key, value in self.gear_requirements:
+            if key not in actor.gear.get_items():
+                return False
+            if actor.gear.get_items()[key].level < value:
+                return False
+        if self.profession_requirements:
+            if actor.profession.name not in self.profession_requirements:
+                return False
+        if self.title_requirements:
+            if actor.title.name not in self.title_requirements:
+                return False
+        return True

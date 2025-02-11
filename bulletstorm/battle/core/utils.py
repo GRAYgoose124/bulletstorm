@@ -11,6 +11,9 @@ def input_selection(prompt, options):
         except ValueError:
             print("Invalid selection.")
             continue
+        except KeyboardInterrupt:
+            print("Invalid selection.")
+            raise KeyboardInterrupt
         if selection < 1 or selection > len(options):
             print("Invalid selection.")
             selection = None

@@ -8,3 +8,7 @@ slash_attack = Action(
     permanent_effects_on_target=ActorStats.zero(health=-1),
     can_target_enemies=True,
 )
+
+__all__ = [
+    "slash_attack",
+]

@@ -109,11 +109,29 @@ class BattleEngine:
         action = input_selection("Select an action: ", possible_actions)
 
         targets = self._get_possible_action_targets(action)
-        target = input_selection("Select a target: ", targets)
+        if action.max_targets == 1:
+            target = input_selection("Select a target: ", targets)
 
-        print(f"\t{self.active_actor.name} targets {target.name} with {action.name}.")
+            print(f"\t{self.active_actor.name} targets {target.name} with {action.name}.")
 
-        self._do_action(action, target)
+            self._do_action(action, target)
+        else:
+            targets = self._get_possible_action_targets(action)
+            selected_targets = []
+            tries = 0
+            while len(selected_targets) < (action.max_targets - tries):
+                try:
+                    target = input_selection("Select a target: ", targets)
+                except KeyboardInterrupt:
+                    break
+                if target and target not in selected_targets:
+                    selected_targets.append(target)
+                else:
+                    tries += 1
+
+            for target in selected_targets:
+                self._do_action(action, target)
+
         if end_turn:
             self._next_turn()
 
@@ -149,8 +167,8 @@ class BattleEngine:
         self.battle_stats = BattleStats()
 
         while not self.battle.is_over:
-            print(f"Turn {self.battle.turn}:")
             self._next_turn()
+            print(f"Turn {self.battle.turn}:")
 
             print(f"\t{self.active_actor.name} is active.")
 

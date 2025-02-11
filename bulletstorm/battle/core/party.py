@@ -15,6 +15,7 @@ class Party:
         self.actors.append(actor)
 
     def remove_actor(self, actor: Actor):
+        actor.party = None
         self.actors.remove(actor)
 
     def __iter__(self):
